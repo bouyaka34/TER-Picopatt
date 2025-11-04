@@ -1,0 +1,10 @@
+*.png
+*.csv
+*.xlsx
+
+__pycache__/
+*.log
+*.tmp
+*.bak
+
+/outputs/
