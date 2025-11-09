@@ -128,7 +128,7 @@ def extract_info_from_filename(name: str):
     return date_str, mslot
 
 
-def load_all(data_dir: Path) -> pd.DataFrame:
+def load_all(data_dir: Path, show_print: bool = True) -> pd.DataFrame:
     """Charge les fichiers et attribue la date et le M_slot selon le nom du fichier."""
     paths = sorted([p for p in data_dir.rglob("*") if p.suffix.lower() in (".csv", ".xlsx", ".xls")])
     assert paths, f"Aucun fichier trouvé dans {data_dir.resolve()}"
@@ -147,8 +147,9 @@ def load_all(data_dir: Path) -> pd.DataFrame:
         df["track_id"] = trk_file
 
         frames.append(df)
-
-        print(f"{p.name:<50} ->  {date_str}  {mslot}")
+        
+        if show_print :
+            print(f"{p.name:<50} ->  {date_str}  {mslot}")
 
     return pd.concat(frames, ignore_index=True, sort=False) 
 
