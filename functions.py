@@ -96,7 +96,7 @@ def read_any(p: Path) -> pd.DataFrame:
                 continue
         if df is None:
             raise ValueError(f"Impossible de lire le fichier : {p}")
-    df["__source_file"] = p.name
+    df["fichier_originaire"] = p.name
     return df
 
 
