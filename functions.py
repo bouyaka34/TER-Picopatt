@@ -127,31 +127,51 @@ def extract_info_from_filename(name: str):
 
     return date_str, mslot
 
-
 def load_all(data_dir: Path, show_print: bool = True) -> pd.DataFrame:
-    """Charge les fichiers et attribue la date et le M_slot selon le nom du fichier."""
+    """
+    Charge tous les fichiers du dossier et ajoute les colonnes :
+    - fichier_originaire : nom du fichier source
+    - date : extraite du nom du fichier
+    - M_slot : créneau horaire (M1 à M4)
+    - track_id : parcours (antigone, boulevards, écusson)
+    """
     paths = sorted([p for p in data_dir.rglob("*") if p.suffix.lower() in (".csv", ".xlsx", ".xls")])
     assert paths, f"Aucun fichier trouvé dans {data_dir.resolve()}"
 
     frames = []
     for p in paths:
-        df = read_any(p)
+        try:
+            df = read_any(p)
+        except Exception as e:
+            print(f"⚠️ Erreur de lecture pour {p.name} : {e}")
+            continue
 
-        #  Extrait infos depuis le nom du fichier
+        # 🔹 Ajout explicite du nom du fichier d’origine
+        df["fichier_originaire"] = p.name
+
+        # 🔹 Extraction des infos depuis le nom du fichier
         date_str, mslot = extract_info_from_filename(p.name)
         df["date"] = pd.to_datetime(date_str).date() if date_str else np.nan
         df["M_slot"] = mslot
 
-        # Déduit le parcours
-        trk_file = infer_track_from_filename(p.name)
-        df["track_id"] = trk_file
+        # 🔹 Déduction du parcours
+        df["track_id"] = infer_track_from_filename(p.name)
 
         frames.append(df)
-        
-        if show_print :
+
+        if show_print:
             print(f"{p.name:<50} ->  {date_str}  {mslot}")
 
-    return pd.concat(frames, ignore_index=True, sort=False) 
+    # --- Concaténation finale
+    raw = pd.concat(frames, ignore_index=True, sort=False)
+
+    # Vérification automatique : si la colonne n’existe pas, on la crée
+    if "fichier_originaire" not in raw.columns:
+        raw["fichier_originaire"] = "unknown"
+    else:
+        raw["fichier_originaire"] = raw["fichier_originaire"].astype(str)
+
+    return raw
 
 
 # STATS
