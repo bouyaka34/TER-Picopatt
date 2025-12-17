@@ -1,0 +1,46 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1.}Introduction et contexte du TER}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1.}Contexte du projet PICOPATT}{3}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1.}Problématique majeure}{3}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2.}Présentation du projet PICOPATT}{3}{subsubsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.3.}Définition de picoclimats urbains}{3}{subsubsection.1.1.3}%
+\contentsline {subsubsection}{\numberline {1.1.4.}Une station météorologique mobile}{4}{subsubsection.1.1.4}%
+\contentsline {subsection}{\numberline {1.2.}Les missions du TER}{5}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1.}Compréhension et préparation des données}{5}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2.}Construction de silhouettes picoclimatiques}{5}{subsubsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.3.}Préparation des modèles d’apprentissage automatique}{6}{subsubsection.1.2.3}%
+\contentsline {section}{\numberline {2.}Présentation des données}{7}{section.2}%
+\contentsline {subsection}{\numberline {2.1.}Les campagnes métrologiques}{7}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1.}Les parcours}{7}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2.}Les mesures}{8}{subsubsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.3.}Contraintes de terrain}{8}{subsubsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.2.}Les variables mesurées}{9}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3.}Organisation des fichiers}{10}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1.}Format des fichiers}{10}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2.}Sélection des fichiers pour l’analyse}{10}{subsubsection.2.3.2}%
+\contentsline {section}{\numberline {3.}Nettoyage des données}{11}{section.3}%
+\contentsline {subsection}{\numberline {3.1.}Premières approches des données}{11}{subsection.3.1}%
+\contentsline {subsubsection}{\numberline {3.1.1.}Couverture temporelle et spatiale des données}{11}{subsubsection.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.1.2.}Comparaison temporelle des passages}{12}{subsubsection.3.1.2}%
+\contentsline {subsubsection}{\numberline {3.1.3.}Détection et correction des valeurs aberrantes}{13}{subsubsection.3.1.3}%
+\contentsline {subsubsection}{\numberline {3.1.4.}Validation des extrêmes réalistes et cohérence physique}{14}{subsubsection.3.1.4}%
+\contentsline {subsubsection}{\numberline {3.1.5.}Visualisation des valeurs manquantes}{15}{subsubsection.3.1.5}%
+\contentsline {subsection}{\numberline {3.2.}Traitement des valeurs nulles}{15}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1.}Visualisation des valeurs nulles}{15}{subsubsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2.}Détails de l'imputation réalisée}{16}{subsubsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.3.}Résultats obtenus}{16}{subsubsection.3.2.3}%
+\contentsline {section}{\numberline {4.}Analyse exploratoire des données}{18}{section.4}%
+\contentsline {subsection}{\numberline {4.1.}Observation de la distribution de chaque variable}{18}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1.}Distribution globale et par parcours}{18}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2.}Distribution par section}{19}{subsubsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.3.}Distribution via boxplot et violin plot}{20}{subsubsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.2.}Corrélations entre variables}{21}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1.}Corrélation entre les variables par parcours}{21}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2.}Corrélation entre les variables par \texttt {M\_slot} de chaque parcours}{22}{subsubsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.3.}Profils spatio-temporels}{23}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1.}Agrégé par \texttt {M\_slots}}{23}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2.}A l'échelle d'une mesure}{25}{subsubsection.4.3.2}%
+\contentsline {section}{\numberline {5.}Missions restantes}{28}{section.5}%
+\contentsline {subsection}{\numberline {5.1.}Les silhouettes}{28}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2.}Pistes d'apprentissage profond}{28}{subsection.5.2}%
+\contentsline {section}{\numberline {6.}Conclusion et perspectives}{29}{section.6}%

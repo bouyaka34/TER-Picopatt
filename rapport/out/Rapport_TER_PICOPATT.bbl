@@ -1,0 +1,74 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{picopatt-site}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://anr.fr/Projet-ANR-23-CE22-0005}}
+      \field{title}{Projet ANR PICOPATT}
+    \endentry
+    \entry{aau-site}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://aau.archi.fr/}}
+      \field{title}{Laboratoire AAU Ambiances Architectures Urbanités}
+    \endentry
+    \entry{crenau-site}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://aau.archi.fr/equipes/crenau/}}
+      \field{title}{Équipe CRENAU du laboratoire AAU}
+    \endentry
+    \entry{lirmm-site}{misc}{}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.lirmm.fr/}}
+      \field{title}{LIRMM - Laboratoire d'Informatique, de Robotique et de Microélectronique de Montpellier}
+    \endentry
+    \entry{advanse-site}{misc}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.lirmm.fr/advanse/}}
+      \field{title}{Équipe ADVANSE - Advanced Analytics for Data Science}
+    \endentry
+    \entry{picopatt-picoclimat}{misc}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://aau.archi.fr/contrat-de-recherche/picopatt-patterns-picoclimatiques-urbains/}}
+      \field{title}{PICOPATT Patterns picoclimatiques urbains}
+    \endentry
+    \entry{depot-github}{misc}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://github.com/bouyaka34/TER-Picopatt}}
+      \field{title}{Dépôt GitHub du projet TER}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

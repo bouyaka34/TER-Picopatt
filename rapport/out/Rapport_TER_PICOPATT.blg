@@ -1,0 +1,15 @@
+[0] Config.pm:307> INFO - This is Biber 2.19
+[0] Config.pm:310> INFO - Logfile is 'out/Rapport_TER_PICOPATT.blg'
+[169] biber-MSWIN64:340> INFO - === 
+[225] Biber.pm:419> INFO - Reading 'out/Rapport_TER_PICOPATT.bcf'
+[379] Biber.pm:979> INFO - Found 7 citekeys in bib section 0
+[411] Biber.pm:4419> INFO - Processing section 0
+[436] Biber.pm:4610> INFO - Looking for bibtex file 'references.bib' for section 0
+[514] bibtex.pm:1713> INFO - LaTeX decoding ...
+[530] bibtex.pm:1519> INFO - Found BibTeX data source 'references.bib'
+[600] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'variable = shifted' with 'variable = non-ignorable'
+[602] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[603] Biber.pm:4239> INFO - Sorting list 'none/global//global/global' of type 'entry' with template 'none' and locale 'fr-FR'
+[604] Biber.pm:4245> INFO - No sort tailoring available for locale 'fr-FR'
+[616] bbl.pm:660> INFO - Writing 'out/Rapport_TER_PICOPATT.bbl' with encoding 'UTF-8'
+[619] bbl.pm:763> INFO - Output to out/Rapport_TER_PICOPATT.bbl
