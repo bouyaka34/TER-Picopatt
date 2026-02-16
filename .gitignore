@@ -1,6 +1,7 @@
 *.png
 *.csv
 *.xlsx
+*.env
 
 __pycache__/
 *.log
