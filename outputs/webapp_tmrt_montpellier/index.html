@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PICOPATT - Carte Tmrt</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <aside class="control-panel" aria-label="Filtres carte Tmrt">
+      <div class="brand-block">
+        <p class="eyebrow">Projet TER</p>
+        <h1>PICOPATT</h1>
+      </div>
+
+      <section class="control-group route-control-group" aria-labelledby="routes-title">
+        <h2 id="routes-title">Parcours</h2>
+        <div class="route-mode" id="routeModeControls" aria-label="Mode d'affichage des parcours">
+          <button type="button" class="active" data-route-mode="trace">Tracé</button>
+          <button type="button" data-route-mode="pred">Prédite</button>
+          <button type="button" data-route-mode="observed">Observée</button>
+          <button type="button" data-route-mode="error">Erreur</button>
+        </div>
+        <div class="route-list" id="routeControls"></div>
+        <p class="route-note" id="routeNote">-</p>
+      </section>
+
+      <section class="scenario-panel heatmap-data" aria-live="polite">
+        <div>
+          <p class="eyebrow">Raster</p>
+          <h2 id="scenarioTitle">CatBoost - grille 10 m</h2>
+        </div>
+        <dl class="stats-grid">
+          <div>
+            <dt>Min pred.</dt>
+            <dd id="tmrtMin">-</dd>
+          </div>
+          <div>
+            <dt>Mediane</dt>
+            <dd id="tmrtMedian">-</dd>
+          </div>
+          <div>
+            <dt>Max pred.</dt>
+            <dd id="tmrtMax">-</dd>
+          </div>
+          <div>
+            <dt>Points</dt>
+            <dd id="observedRows">-</dd>
+          </div>
+        </dl>
+        <p class="scenario-date" id="scenarioDate">-</p>
+      </section>
+
+      <section class="model-panel">
+        <div class="model-row">
+          <span>Grille</span>
+          <strong id="gridPoints">-</strong>
+        </div>
+        <div class="model-row">
+          <span>Granularite</span>
+          <strong id="granularity">-</strong>
+        </div>
+        <div class="model-row">
+          <span>Modele</span>
+          <strong id="scenarioCount">-</strong>
+        </div>
+      </section>
+    </aside>
+
+    <section class="map-area" aria-label="Carte Tmrt">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Montpellier</p>
+          <h2 id="mapTitle">-</h2>
+        </div>
+        <div class="toolbar" aria-label="Outils carte">
+          <button type="button" id="zoomOut" title="Dezoomer">-</button>
+          <button type="button" id="fitView" title="Recentrer">Fit</button>
+          <button type="button" id="zoomIn" title="Zoomer">+</button>
+        </div>
+      </header>
+
+      <div class="stage" id="stage">
+        <div class="leaflet-map" id="leafletMap" aria-label="Carte Tmrt Montpellier"></div>
+        <div class="loading-layer" id="loadingLayer">Chargement</div>
+        <div class="error-layer hidden" id="errorLayer">Couche indisponible</div>
+        <div class="map-credit">Fond satellite: Esri / OpenStreetMap</div>
+      </div>
+
+      <footer class="bottom-panel">
+        <div class="legend-stack">
+          <span class="legend-title">Tmrt predite</span>
+          <div class="legend-block">
+            <span id="legendMin">-</span>
+            <div class="legend-range" aria-label="Selection de plage Tmrt">
+              <div class="legend-bar" aria-hidden="true"></div>
+              <div class="legend-selection" id="legendSelection" aria-hidden="true"></div>
+              <input id="tmrtRangeMin" class="legend-slider" type="range" min="0" max="1000" value="0" aria-label="Borne basse Tmrt" />
+              <input id="tmrtRangeMax" class="legend-slider" type="range" min="0" max="1000" value="1000" aria-label="Borne haute Tmrt" />
+            </div>
+            <span id="legendMax">-</span>
+          </div>
+          <div class="legend-filter">Affiché : <strong id="legendRangeLabel">-</strong></div>
+        </div>
+        <label class="opacity-control">
+          <span>Heatmap</span>
+          <input id="opacityRange" type="range" min="0" max="100" value="68" />
+          <strong id="opacityValue">68%</strong>
+        </label>
+      </footer>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="./scenario-data.js?v=value-tiles-zoomfix-20260515"></script>
+  <script src="./app.js?v=value-tiles-zoomfix-20260515"></script>
+</body>
+</html>

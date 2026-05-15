@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "source": "outputs\\heatmap_tmrt_montpellier_10m\\tmrt_montpellier_10m_predictions_catboost.csv",
+  "source_mtime_ns": 1778780747555899900,
+  "source_size": 92698922,
+  "bounds": [
+    [
+      43.5587043762207,
+      3.7986068725585938
+    ],
+    [
+      43.66122817993164,
+      3.961625576019287
+    ]
+  ],
+  "tile_size": 256,
+  "min_zoom": 12,
+  "max_zoom": 17,
+  "value_min": 14.342850093707607,
+  "value_max": 22.74886346259081,
+  "raster_scale": 2,
+  "url_template": "./heatmap_value_tiles/{z}/{x}/{y}.png"
+}
