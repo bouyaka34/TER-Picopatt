@@ -19,9 +19,13 @@ MAIN_PREDICTIONS = DATA_PROCESSED / "prediction" / "heatmap_tmrt_montpellier_10m
 ROUTE_PREDICTIONS = DATA_PROCESSED / "prediction" / "tmrt_predictions_grid_or_points.csv"
 CLEAN_NOZEROS = DATA_PROCESSED / "picopatt" / "clean_nozeros"
 HEATMAP_TILE_SOURCE = ROOT / "prediction" / "figures" / "heatmap_tmrt_montpellier_10m" / "tmrt_montpellier_10m_overlay_catboost_smooth2x.png"
-HEATMAP_EXPORT = ROOT / "prediction" / "figures" / "heatmap_tmrt_montpellier_10m" / "tmrt_montpellier_10m_overlay_catboost_smooth2x.webp"
+HEATMAP_TILE_FALLBACK = ROOT / "prediction" / "figures" / "heatmap_tmrt_montpellier_10m" / "tmrt_montpellier_10m_overlay_catboost.png"
+if not HEATMAP_TILE_SOURCE.exists() and HEATMAP_TILE_FALLBACK.exists():
+    HEATMAP_TILE_SOURCE = HEATMAP_TILE_FALLBACK
+HEATMAP_EXPORT = HEATMAP_TILE_SOURCE
 APP_DIR = ROOT / "app" / "webapp_tmrt_montpellier"
 DATA_JS = APP_DIR / "scenario-data.js"
+LOCAL_HEATMAP_IMAGE = APP_DIR / "heatmap_overlay.png"
 TILE_DIR = APP_DIR / "heatmap_tiles"
 TILE_MANIFEST = TILE_DIR / "manifest.json"
 VALUE_TILE_DIR = APP_DIR / "heatmap_value_tiles"
@@ -233,10 +237,23 @@ def ensure_value_tiles(main_metadata: dict) -> dict:
 
                 tile = Image.new("RGBA", (TILE_SIZE, TILE_SIZE), (0, 0, 0, 0))
                 tile.alpha_composite(crop, (round(ix0 - x0), round(iy0 - y0)))
-                tile.save(zoom_dir / f"{y}.png", format="PNG", optimize=True)
+                tile.save(zoom_dir / f"{y}.png", format="PNG", compress_level=1)
 
     VALUE_TILE_MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return manifest
+
+
+def ensure_local_heatmap_image() -> Path:
+    if not HEATMAP_TILE_SOURCE.exists():
+        raise FileNotFoundError(f"Image de heatmap introuvable: {HEATMAP_TILE_SOURCE}")
+
+    if (
+        not LOCAL_HEATMAP_IMAGE.exists()
+        or LOCAL_HEATMAP_IMAGE.stat().st_mtime_ns < HEATMAP_TILE_SOURCE.stat().st_mtime_ns
+        or LOCAL_HEATMAP_IMAGE.stat().st_size != HEATMAP_TILE_SOURCE.stat().st_size
+    ):
+        shutil.copy2(HEATMAP_TILE_SOURCE, LOCAL_HEATMAP_IMAGE)
+    return LOCAL_HEATMAP_IMAGE
 
 
 def build_tracks() -> dict:
@@ -373,6 +390,7 @@ def build_tracks() -> dict:
 def build_payload() -> dict:
     metadata = json.loads(METADATA.read_text(encoding="utf-8")) if METADATA.exists() else {}
     main_metadata = json.loads(MAIN_METADATA.read_text(encoding="utf-8"))
+    local_heatmap = ensure_local_heatmap_image()
     tile_manifest = ensure_heatmap_tiles()
     value_tile_manifest = ensure_value_tiles(main_metadata)
 
@@ -390,8 +408,8 @@ def build_payload() -> dict:
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "main_heatmap": {
             "title": "Carte de la Tmrt prédite via embedding AlphaEarth (10 m)",
-            "image_url": "../../prediction/figures/heatmap_tmrt_montpellier_10m/tmrt_montpellier_10m_overlay_catboost_smooth2x.webp",
-            "export_url": "../../prediction/figures/heatmap_tmrt_montpellier_10m/tmrt_montpellier_10m_overlay_catboost_smooth2x.webp",
+            "image_url": f"./{local_heatmap.name}",
+            "export_url": f"./{local_heatmap.name}",
             "tile_url_template": tile_manifest["url_template"],
             "value_tile_url_template": value_tile_manifest["url_template"],
             "tile_min_zoom": tile_manifest["min_zoom"],

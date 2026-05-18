@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "source": "prediction\\figures\\heatmap_tmrt_montpellier_10m\\tmrt_montpellier_10m_overlay_catboost.png",
+  "source_mtime_ns": 1779117926901664000,
+  "source_size": 3643106,
+  "bounds": [
+    [
+      43.5587043762207,
+      3.7986068725585938
+    ],
+    [
+      43.66122817993164,
+      3.961625576019287
+    ]
+  ],
+  "tile_size": 256,
+  "min_zoom": 12,
+  "max_zoom": 17,
+  "url_template": "./heatmap_tiles/{z}/{x}/{y}.webp"
+}
