@@ -1,25 +1,20 @@
-# TER-Picopatt – branche `Notebook`
+# TER-Picopatt
 
-Cette branche contient les notebooks Jupyter et le code Python utilisés pour l’analyse exploratoire des données PICOPATT (Montpellier) et la préparation des étapes suivantes autour des silhouettes de picoclimats.
+Ce dépôt regroupe le travail réalisé dans le cadre du TER PICOPATT, en Master 1 MIASHS (2025-2026). L'organisation suit les grandes étapes du projet : prise en main des données, nettoyage, analyse, extraction AlphaEarth, prédiction de la TMRT et visualisation.
 
-## Contenu de la branche
+## Arborescence
 
-- `Analyse_exploratoire.ipynb` : notebook principal (distributions, corrélations, profils, comparaisons par parcours et créneaux).
-- `Localisation.ipynb` : éléments liés à la structuration spatiale et à la localisation (selon la version).
-- `NoZero.ipynb` : traitement des zéros assimilés à des défauts capteurs (imputation courte puis NaN).
-- `agreg.ipynb` : agrégations et tests (par parcours, créneau, etc.).
-- `functions.py` : fonctions utilitaires communes.
-- `requirements.txt` : liste de dépendances.
+- `data/` : emplacement local des données. Les fichiers de données ne sont pas envoyés sur Git.
+- `src/picopatt/` : fonctions Python communes utilisées par plusieurs notebooks ou scripts.
+- `analyse_exploratoire/` : prise en main des données, nettoyage et etc.
+- `alphaearth/` : extraction et préparation des données AlphaEarth.
+- `prediction/` : prédiction de la TMRT et génération de la heatmap Montpellier.
+- `app/` : application web de visualisation (heatmap Montpellier).
+- `rapport/` : rapports et supports rendues pour les présentions du S1 et S2.
 
 ## Données
 
-Les données brutes PICOPATT (CSV) ne sont pas incluses dans le dépôt.
-
-Les notebooks supposent un dossier de données en local. Il faut donc adapter le chemin de chargement dans les premières cellules (variable du type `DATA_DIR` ou `path`).
-
-## Sorties
-
-Les notebooks génèrent des figures et sorties intermédiaires. Les figures finales sont destinées à être versionnées dans la branche `Figures` (ou exportées localement selon l’organisation choisie).
+Les données brutes PICOPATT, les exports AlphaEarth, les fichiers Météo-France et les résultats volumineux ne sont pas inclus directement dans le dépôt.
 
 ## Auteurs
 

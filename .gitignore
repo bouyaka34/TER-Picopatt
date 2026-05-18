@@ -2,14 +2,31 @@
 *.csv
 *.xlsx
 *.env
+*.parquet
+*.pkl
+*.joblib
 
 __pycache__/
 *.log
 *.tmp
 *.bak
 
-/outputs/
-/rapport/
 /.vscode/
 /dataproc/
 /alphaearth_exports/
+/outputs/
+
+/data/raw/*
+/data/processed/*
+/data/external/*
+!/data/README.md
+!/data/raw/.gitkeep
+!/data/processed/.gitkeep
+!/data/external/.gitkeep
+
+/app/webapp_tmrt_montpellier/scenario-data.js
+/app/webapp_tmrt_montpellier/heatmap_tiles/
+/app/webapp_tmrt_montpellier/heatmap_value_tiles/
+
+!/rapport/s1/
+!/rapport/s1/**
