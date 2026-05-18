@@ -30,20 +30,29 @@ TARGET = "tmrt"
 BANDS = [f"A{i:02d}" for i in range(64)]
 MF_BASE_CANDIDATES = [
     "T",
+    "TD",
+    "TN",
+    "TX",
     "U",
+    "UN",
+    "UX",
+    "UABS",
     "PSTAT",
+    "PMER",
     "FF",
-    "DD",
+    "FXY",
     "FXI",
     "RR1",
+    "DRR1",
     "N",
+    "NBAS",
     "INS",
     "GLO",
-    "DIR",
-    "DIF",
+    "GLO2",
     "WW",
     "VV",
 ]
+MF_DIRECTION_COLUMNS = ["DD", "DXI"]
 HGBR_TUNED = {
     "max_iter": 500,
     "learning_rate": 0.05,
@@ -112,16 +121,90 @@ def merge_nearest_weather(df: pd.DataFrame, wx: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def build_mf_features(train: pd.DataFrame) -> list[str]:
-    mf_base = [c for c in MF_BASE_CANDIDATES if c in train.columns]
-    mf_q = [f"Q{c}" for c in mf_base if f"Q{c}" in train.columns]
+def keep_informative_numeric(df: pd.DataFrame, columns: list[str]) -> list[str]:
+    kept: list[str] = []
+    for col in columns:
+        if col not in df.columns:
+            continue
+        values = safe_numeric(df[col])
+        if values.notna().any() and values.nunique(dropna=True) > 1:
+            kept.append(col)
+    return kept
+
+
+def add_meteofrance_derived_features(df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+    df = df.copy()
+    derived: list[str] = []
+
+    for col in MF_DIRECTION_COLUMNS:
+        if col in df.columns:
+            radians = np.deg2rad(safe_numeric(df[col]) % 360)
+            df[f"{col}_sin"] = np.sin(radians)
+            df[f"{col}_cos"] = np.cos(radians)
+            derived.extend([f"{col}_sin", f"{col}_cos"])
+
+    if {"FF", "DD"}.issubset(df.columns):
+        radians = np.deg2rad(safe_numeric(df["DD"]) % 360)
+        ff = safe_numeric(df["FF"])
+        df["wind_u"] = ff * np.sin(radians)
+        df["wind_v"] = ff * np.cos(radians)
+        derived.extend(["wind_u", "wind_v"])
+
+    if {"FXI", "DXI"}.issubset(df.columns):
+        radians = np.deg2rad(safe_numeric(df["DXI"]) % 360)
+        fxi = safe_numeric(df["FXI"])
+        df["gust_u"] = fxi * np.sin(radians)
+        df["gust_v"] = fxi * np.cos(radians)
+        derived.extend(["gust_u", "gust_v"])
+
+    if {"T", "TD"}.issubset(df.columns):
+        df["dewpoint_depression"] = safe_numeric(df["T"]) - safe_numeric(df["TD"])
+        derived.append("dewpoint_depression")
+
+    if {"TX", "TN"}.issubset(df.columns):
+        df["T_range_hour"] = safe_numeric(df["TX"]) - safe_numeric(df["TN"])
+        derived.append("T_range_hour")
+
+    if {"UX", "UN"}.issubset(df.columns):
+        df["U_range_hour"] = safe_numeric(df["UX"]) - safe_numeric(df["UN"])
+        derived.append("U_range_hour")
+
+    if "RR1" in df.columns:
+        rr1 = safe_numeric(df["RR1"])
+        df["rain_flag"] = (rr1.fillna(0) > 0).astype(int)
+        derived.append("rain_flag")
+
+    if {"RR1", "DRR1"}.issubset(df.columns):
+        df["rain_duration_weighted"] = safe_numeric(df["RR1"]).fillna(0) * safe_numeric(df["DRR1"]).fillna(0)
+        derived.append("rain_duration_weighted")
+
+    if {"GLO", "INS"}.issubset(df.columns):
+        df["GLO_x_INS"] = safe_numeric(df["GLO"]).fillna(0) * safe_numeric(df["INS"]).fillna(0)
+        derived.append("GLO_x_INS")
+
+    if "WW" in df.columns:
+        ww = safe_numeric(df["WW"])
+        df["ww_precip_flag"] = ww.between(50, 99).fillna(False).astype(int)
+        df["ww_fog_flag"] = ww.between(40, 49).fillna(False).astype(int)
+        df["ww_thunder_flag"] = ww.between(95, 99).fillna(False).astype(int)
+        derived.extend(["ww_precip_flag", "ww_fog_flag", "ww_thunder_flag"])
+
+    return df, keep_informative_numeric(df, derived)
+
+
+def build_mf_features(train: pd.DataFrame, derived_features: list[str] | None = None) -> list[str]:
+    mf_base = keep_informative_numeric(train, [c for c in MF_BASE_CANDIDATES if c in train.columns])
     missing_flags: list[str] = []
-    for col in mf_base:
+    for col in [c for c in MF_BASE_CANDIDATES if c in train.columns]:
+        values = safe_numeric(train[col])
+        if not values.notna().any() or not values.isna().any():
+            continue
         flag = f"{col}_missing"
         train[flag] = train[col].isna().astype(int)
-        missing_flags.append(flag)
-    features = mf_base + mf_q + missing_flags
-    return [c for c in features if train[c].notna().any()]
+        if train[flag].nunique(dropna=True) > 1:
+            missing_flags.append(flag)
+    features = mf_base + (derived_features or []) + missing_flags
+    return keep_informative_numeric(train, features)
 
 
 def add_time_and_extra_features(df: pd.DataFrame, include_coordinates: bool) -> tuple[pd.DataFrame, list[str]]:
@@ -194,7 +277,8 @@ def train_model(
     train = dfm.dropna(subset=[TARGET, "DATE"]).copy()
     train["day_utc"] = train["timestamp_utc"].dt.floor("D")
 
-    mf_features = build_mf_features(train)
+    train, mf_derived_features = add_meteofrance_derived_features(train)
+    mf_features = build_mf_features(train, mf_derived_features)
     train, extra_features = add_time_and_extra_features(train, include_coordinates=include_coordinates)
 
     raw_features = [c for c in BANDS if c in train.columns and train[c].notna().any()]
