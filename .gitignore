@@ -28,5 +28,11 @@ __pycache__/
 /app/webapp_tmrt_montpellier/heatmap_tiles/
 /app/webapp_tmrt_montpellier/heatmap_value_tiles/
 
+!/analyse_exploratoire/figures/
+!/analyse_exploratoire/figures/**
+
+!/prediction/figures/
+!/prediction/figures/**
+
 !/rapport/s1/
 !/rapport/s1/**
