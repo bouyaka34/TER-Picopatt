@@ -90,8 +90,8 @@
 
 \title{\vspace{-4cm}Rapport d'avancement TER\\[0.3cm]
 Projet PICOPATT}
-\author{Anthony Combes-AguÃ©ra, Ayoub Akkouh, Dylla Liesse Izere, Youssef El Alaoui}
-\date{AnnÃ©e universitaire 2025-2026}
+\author{Anthony Combes-Aguéra, Ayoub Akkouh, Dylla Liesse Izere, Youssef El Alaoui}
+\date{Année universitaire 2025-2026}
 
 \begin{document}
 
@@ -278,29 +278,29 @@ Les parcours sont mesurÃ©s en rotation. Un jour est rÃ©servÃ© Ã  un seul
     \centering
     \includegraphics[width=\textwidth]{rapport/s1/Images/Parcours/boulevard.png}
     \caption{Boulevards}
-    \label{fig:tracÃ©_boulevard}
+    \label{fig:tracé_boulevard}
 \end{subfigure}
 \hspace{0.01\textwidth}
 \begin{subfigure}[b]{0.2\textwidth}
     \centering
     \includegraphics[width=\textwidth]{rapport/s1/Images/Parcours/ecusson.png}
-    \caption{Ã‰cusson}
-    \label{fig:tracÃ©_ecusson}
+    \caption{Écusson}
+    \label{fig:tracé_ecusson}
 \end{subfigure}
 \hspace{0.01\textwidth}
 \begin{subfigure}[b]{0.55\textwidth}
     \centering
     \includegraphics[width=\textwidth]{rapport/s1/Images/Parcours/antigone.png}
     \caption{Antigone}
-    \label{fig:tracÃ©_antigone}
+    \label{fig:tracé_antigone}
 \end{subfigure}
-\caption{Captures dâ€™Ã©cran des tracÃ©s des diffÃ©rents parcours.}
+\caption{Captures d'écran des tracés des différents parcours.}
 \vspace{-0.45cm}
 \caption*{\footnotesize Source : Picopatt ExploreR (ADVANSE - LIRMM)}
 
 \end{figure}
 
-Les trois parcours montpelliÃ©rains se trouvent dans le centre-ville mais possÃ¨dent de fortes diffÃ©rences comme dÃ©crit dans  \hyperref[sec:intro_parcours]{l'introduction Ã  la section 1.1.4.} \hyperref[tab:parcours_sections]{Le tableau 1} en propose une synthÃ¨se.
+Les trois parcours montpelliérains se trouvent dans le centre-ville mais possèdent de fortes différences comme décrit dans  \hyperref[sec:intro_parcours]{l'introduction à la section 1.1.4.} \hyperref[tab:parcours_sections]{Le tableau 1} en propose une synthèse.
 
 \vspace{0.1cm}
 
@@ -383,32 +383,32 @@ La station mÃ©tÃ©orologique mobile enregistre, Ã  chaque instant, un ensem
 \toprule
 \textbf{Famille de variables} & \textbf{Description} \\
 \midrule
-Localisation et mÃ©tadonnÃ©es &
-CoordonnÃ©es GPS (RTK et projetÃ©es sur le tracÃ© du parcours), identifiants de parcours, de sections et de points, permettant lâ€™analyse spatiale et le dÃ©coupage des profils. \\
+Localisation et métadonnées &
+Coordonnées GPS (RTK et projetées sur le tracé du parcours), identifiants de parcours, de sections et de points, permettant l’analyse spatiale et le découpage des profils. \\
 \addlinespace
-TempÃ©rature de lâ€™air (\texttt{T\textsubscript{air}}) &
-TempÃ©ratures mesurÃ©es par diffÃ©rents capteurs (thermo-hygromÃ¨tre, thermocouples, anÃ©momÃ¨tre), permettant de caractÃ©riser lâ€™air ambiant et de comparer les mesures selon les dispositifs. \\
+Température de l’air (\texttt{T\textsubscript{air}}) &
+Températures mesurées par différents capteurs (thermo-hygromètre, thermocouples, anémomètre), permettant de caractériser l’air ambiant et de comparer les mesures selon les dispositifs. \\
 \addlinespace
-HumiditÃ© relative (\texttt{rh}) &
-HumiditÃ© de lâ€™air mesurÃ©e sous abri, utilisÃ©e pour lâ€™analyse du confort thermique et lâ€™identification de zones plus humides ou rafraÃ®chies. \\
+Humidité relative (\texttt{rh}) &
+Humidité de l’air mesurée sous abri, utilisée pour l’analyse du confort thermique et l’identification de zones plus humides ou rafraîchies. \\
 \addlinespace
 Vent &
-Vitesse (\texttt{ws}) et direction (\texttt{wdir}) du vent mesurÃ©es par lâ€™anÃ©momÃ¨tre, permettant dâ€™identifier des zones ventilÃ©es, abritÃ©es ou des couloirs de vent urbains. \\
+Vitesse (\texttt{ws}) et direction (\texttt{wdir}) du vent mesurées par l’anémomètre, permettant d’identifier des zones ventilées, abritées ou des couloirs de vent urbains. \\
 \addlinespace
 Rayonnement solaire (\texttt{sw}) &
-Flux radiatifs de courtes longueurs dâ€™onde mesurÃ©s dans six directions autour de la station (haut, bas, avant, arriÃ¨re, gauche, droite), afin de caractÃ©riser lâ€™exposition solaire et les effets dâ€™ombre. \\
+Flux radiatifs de courtes longueurs d’onde mesurés dans six directions autour de la station (haut, bas, avant, arrière, gauche, droite), afin de caractériser l’exposition solaire et les effets d’ombre. \\
 \addlinespace
 Rayonnement thermique (\texttt{lw}) &
-Flux radiatifs de grandes longueurs dâ€™onde mesurÃ©s dans les mÃªmes six directions, reflÃ©tant lâ€™Ã©mission thermique des surfaces urbaines proches. \\
+Flux radiatifs de grandes longueurs d’onde mesurés dans les mêmes six directions, reflétant l’émission thermique des surfaces urbaines proches. \\
 \addlinespace
 Indices de confort &
-TempÃ©rature moyenne radiante (\texttt{tmrt}) et Physiological Equivalent Temperature (\texttt{pet}), calculÃ©es Ã  partir des variables mesurÃ©es, pour Ã©valuer le confort thermique ressenti. \\
+Température moyenne radiante (\texttt{tmrt}) et Physiological Equivalent Temperature (\texttt{pet}), calculées à partir des variables mesurées, pour évaluer le confort thermique ressenti. \\
 \addlinespace
-GÃ©omÃ©trie solaire &
-Azimut et hauteur du soleil, calculÃ©s pour chaque timestamp, utilisÃ©s pour interprÃ©ter les variations de rayonnement et les alternances dâ€™ombre et de soleil. \\
+Géométrie solaire &
+Azimut et hauteur du soleil, calculés pour chaque timestamp, utilisés pour interpréter les variations de rayonnement et les alternances d’ombre et de soleil. \\
 \bottomrule
 \end{tabularx}
-\caption{SynthÃ¨se des principales variables mesurÃ©es lors des campagnes PICOPATT.}
+\caption{Synthèse des principales variables mesurées lors des campagnes PICOPATT.}
 \vspace{-0.45cm}
 \caption*{\footnotesize Source : AAU - ENSA Nantes}
 \label{tab:variables_picopatt}
