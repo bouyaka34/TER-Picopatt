@@ -239,6 +239,232 @@ button {
   line-height: 1.3;
 }
 
+.panel-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-tabs button,
+.selection-actions button,
+.selection-list-header button,
+.selection-item button {
+  min-height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #ffffff;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.panel-tabs button.active,
+.selection-actions button.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.selection-tab-section {
+  display: none;
+}
+
+.control-panel.selection-mode .map-tab-section {
+  display: none;
+}
+
+.control-panel.selection-mode .selection-tab-section {
+  display: block;
+}
+
+.control-panel.selection-mode .selection-control-group {
+  display: grid;
+}
+
+.selection-control-group {
+  display: grid;
+  gap: 8px;
+}
+
+.control-panel:not(.selection-mode) .selection-tab-section {
+  display: none;
+}
+
+.selection-name {
+  width: 100%;
+  min-height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #ffffff;
+  color: var(--ink);
+  padding: 4px 7px;
+  font-size: 12px;
+}
+
+.selection-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 5px;
+  row-gap: 9px;
+  padding-top: 2px;
+}
+
+.selection-actions button {
+  display: grid;
+  min-height: 30px;
+  place-items: center;
+  border-color: #c9d1cc;
+  line-height: 1.05;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+.selection-actions .selection-tool {
+  background: #ffffff;
+  color: #222;
+}
+
+.selection-actions .selection-tool:hover,
+.selection-actions .selection-tool.active {
+  border-color: var(--accent);
+  background: #f7fbf9;
+}
+
+.selection-actions .selection-primary {
+  border-color: var(--accent);
+  background: #eaf6f1;
+  color: #075f49;
+  font-weight: 800;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.selection-actions .selection-primary:hover {
+  background: #dff0e9;
+}
+
+.selection-actions .selection-clear {
+  border-color: #d8d8d0;
+  background: #fbfbf7;
+  color: #555;
+}
+
+.selection-actions .selection-clear:hover {
+  border-color: #b9b9b0;
+  background: #f1f1eb;
+}
+
+.selection-actions button:disabled,
+.selection-list-header button:disabled {
+  border-color: #d8d8d0;
+  background: #eeeeea;
+  color: #8a8a83;
+  cursor: not-allowed;
+}
+
+.selection-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.selection-readout strong {
+  color: var(--ink);
+}
+
+.selection-status {
+  min-height: 16px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.selection-status.ready {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.selection-status.warning {
+  color: var(--warm);
+  font-weight: 700;
+}
+
+.selection-panel {
+  padding-top: 2px;
+}
+
+.selection-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.selection-list-header h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.selection-list {
+  display: grid;
+  gap: 7px;
+}
+
+.selection-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.selection-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 8px;
+  padding: 7px 0;
+  border-top: 1px solid #e7e7e1;
+}
+
+.selection-item strong,
+.selection-item span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selection-item strong {
+  font-size: 12px;
+}
+
+.selection-item span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.selection-item button {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  min-width: 28px;
+  padding: 0 8px;
+}
+
+.leaflet-map.selection-active {
+  cursor: crosshair;
+}
+
+.selection-rectangle {
+  cursor: crosshair;
+}
+
 .scenario-panel,
 .model-panel {
   padding: 16px;

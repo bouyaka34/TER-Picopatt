@@ -14,11 +14,11 @@ window.PICOPATT_DATA = {
   "meters_per_pixel": 10.0,
   "n_grid_points": 1469430,
   "n_train_rows": 341281,
-  "vmin": 14.342850093707607,
-  "vmax": 22.748863462590812,
-  "color_vmin": 16.501723156902678,
-  "color_vmax": 19.877243056533594,
-  "generated_at": "2026-05-18T21:16:07",
+  "vmin": 14.602487660156665,
+  "vmax": 23.665345696181745,
+  "color_vmin": 16.446345785363633,
+  "color_vmax": 20.01901595992879,
+  "generated_at": "2026-05-19T09:54:59",
   "main_heatmap": {
     "title": "Carte de la Tmrt prédite via embedding AlphaEarth (10 m)",
     "image_url": "./heatmap_overlay.png",
@@ -28,14 +28,32 @@ window.PICOPATT_DATA = {
     "tile_min_zoom": 12,
     "tile_max_zoom": 17,
     "n_predicted_points": 1469430,
-    "tmrt_min": 14.342850093707607,
-    "tmrt_median": 18.112051007447427,
-    "tmrt_max": 22.748863462590812,
-    "tmrt_p05": 16.501723156902678,
-    "tmrt_p95": 19.877243056533594,
+    "tmrt_min": 14.602487660156665,
+    "tmrt_median": 18.25101633078827,
+    "tmrt_max": 23.665345696181745,
+    "tmrt_p05": 16.446345785363633,
+    "tmrt_p95": 20.01901595992879,
     "model": "CatBoostRegressor from Prediction.ipynb best config, retrained on all PICOPATT",
     "raster_bins_x": 1314,
     "raster_bins_y": 1133
+  },
+  "selection_grid": {
+    "url": "./selection_grid/tmrt_grid_f32.bin",
+    "bounds": [
+      [
+        43.5587043762207,
+        3.7986068725585938
+      ],
+      [
+        43.66122817993164,
+        3.961625576019287
+      ]
+    ],
+    "cols": 1314,
+    "rows": 1133,
+    "dtype": "float32_le",
+    "byte_length": 5955048,
+    "max_export_points": 150000
   },
   "routes": {
     "source": "data\\processed\\picopatt\\clean_nozeros + data\\processed\\prediction\\tmrt_predictions_grid_or_points.csv",

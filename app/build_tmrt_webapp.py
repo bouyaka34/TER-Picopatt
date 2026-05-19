@@ -30,6 +30,9 @@ TILE_DIR = APP_DIR / "heatmap_tiles"
 TILE_MANIFEST = TILE_DIR / "manifest.json"
 VALUE_TILE_DIR = APP_DIR / "heatmap_value_tiles"
 VALUE_TILE_MANIFEST = VALUE_TILE_DIR / "manifest.json"
+SELECTION_GRID_DIR = APP_DIR / "selection_grid"
+SELECTION_GRID_BIN = SELECTION_GRID_DIR / "tmrt_grid_f32.bin"
+SELECTION_GRID_MANIFEST = SELECTION_GRID_DIR / "manifest.json"
 
 BOUNDS = [[43.5587043762207, 3.7986068725585938], [43.66122817993164, 3.961625576019287]]
 MONTH_ORDER = ["10", "11", "12", "01"]
@@ -47,6 +50,7 @@ TILE_SIZE = 256
 TILE_MIN_ZOOM = 12
 TILE_MAX_ZOOM = 17
 VALUE_RASTER_SCALE = 2
+MAX_SELECTION_EXPORT_POINTS = 150_000
 
 
 def _as_clean_float(value: float, digits: int) -> float:
@@ -243,6 +247,57 @@ def ensure_value_tiles(main_metadata: dict) -> dict:
     return manifest
 
 
+def ensure_selection_grid(main_metadata: dict) -> dict:
+    source_stat = MAIN_PREDICTIONS.stat()
+    nx = int(main_metadata["raster_bins_x"])
+    ny = int(main_metadata["raster_bins_y"])
+    manifest = {
+        "version": 1,
+        "source": str(MAIN_PREDICTIONS.relative_to(ROOT)),
+        "source_mtime_ns": source_stat.st_mtime_ns,
+        "source_size": source_stat.st_size,
+        "bounds": BOUNDS,
+        "cols": nx,
+        "rows": ny,
+        "dtype": "float32_le",
+        "byte_length": nx * ny * 4,
+        "value_min": float(main_metadata["tmrt_pred_min"]),
+        "value_max": float(main_metadata["tmrt_pred_max"]),
+        "max_export_points": MAX_SELECTION_EXPORT_POINTS,
+        "url": "./selection_grid/tmrt_grid_f32.bin",
+    }
+    if SELECTION_GRID_MANIFEST.exists() and SELECTION_GRID_BIN.exists():
+        try:
+            existing = json.loads(SELECTION_GRID_MANIFEST.read_text(encoding="utf-8"))
+            if existing == manifest and SELECTION_GRID_BIN.stat().st_size == manifest["byte_length"]:
+                return manifest
+        except json.JSONDecodeError:
+            pass
+
+    SELECTION_GRID_DIR.mkdir(parents=True, exist_ok=True)
+
+    (south, west), (north, east) = BOUNDS
+    pred = pd.read_csv(MAIN_PREDICTIONS, usecols=["longitude", "latitude", "tmrt_pred"])
+    lon = pd.to_numeric(pred["longitude"], errors="coerce").to_numpy(dtype=float)
+    lat = pd.to_numeric(pred["latitude"], errors="coerce").to_numpy(dtype=float)
+    val = pd.to_numeric(pred["tmrt_pred"], errors="coerce").to_numpy(dtype=float)
+    mask = np.isfinite(lon) & np.isfinite(lat) & np.isfinite(val)
+    lon, lat, val = lon[mask], lat[mask], val[mask]
+
+    sums, _, _ = np.histogram2d(
+        lat,
+        lon,
+        bins=[ny, nx],
+        range=[[south, north], [west, east]],
+        weights=val,
+    )
+    counts, _, _ = np.histogram2d(lat, lon, bins=[ny, nx], range=[[south, north], [west, east]])
+    raster = np.divide(sums, counts, out=np.full_like(sums, np.nan), where=counts > 0)
+    raster.astype("<f4", copy=False).tofile(SELECTION_GRID_BIN)
+    SELECTION_GRID_MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    return manifest
+
+
 def ensure_local_heatmap_image() -> Path:
     if not HEATMAP_TILE_SOURCE.exists():
         raise FileNotFoundError(f"Image de heatmap introuvable: {HEATMAP_TILE_SOURCE}")
@@ -393,6 +448,7 @@ def build_payload() -> dict:
     local_heatmap = ensure_local_heatmap_image()
     tile_manifest = ensure_heatmap_tiles()
     value_tile_manifest = ensure_value_tiles(main_metadata)
+    selection_grid_manifest = ensure_selection_grid(main_metadata)
 
     return {
         "title": "PICOPATT - carte Tmrt",
@@ -423,6 +479,15 @@ def build_payload() -> dict:
             "model": main_metadata["model"],
             "raster_bins_x": int(main_metadata["raster_bins_x"]),
             "raster_bins_y": int(main_metadata["raster_bins_y"]),
+        },
+        "selection_grid": {
+            "url": selection_grid_manifest["url"],
+            "bounds": selection_grid_manifest["bounds"],
+            "cols": selection_grid_manifest["cols"],
+            "rows": selection_grid_manifest["rows"],
+            "dtype": selection_grid_manifest["dtype"],
+            "byte_length": selection_grid_manifest["byte_length"],
+            "max_export_points": selection_grid_manifest["max_export_points"],
         },
         "routes": build_tracks(),
     }

@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": "data\\processed\\prediction\\heatmap_tmrt_montpellier_10m\\tmrt_montpellier_10m_predictions_catboost.csv",
-  "source_mtime_ns": 1779117920990302200,
-  "source_size": 92698922,
+  "source_mtime_ns": 1779135138235433200,
+  "source_size": 92698599,
   "bounds": [
     [
       43.5587043762207,
@@ -16,8 +16,8 @@
   "tile_size": 256,
   "min_zoom": 12,
   "max_zoom": 17,
-  "value_min": 14.342850093707607,
-  "value_max": 22.748863462590812,
+  "value_min": 14.602487660156665,
+  "value_max": 23.665345696181745,
   "raster_scale": 2,
   "url_template": "./heatmap_value_tiles/{z}/{x}/{y}.png"
 }

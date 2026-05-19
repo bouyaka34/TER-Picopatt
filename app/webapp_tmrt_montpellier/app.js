@@ -29,6 +29,17 @@ const dom = {
   routeControls: document.querySelector("#routeControls"),
   routeModeControls: document.querySelector("#routeModeControls"),
   routeNote: document.querySelector("#routeNote"),
+  controlPanel: document.querySelector(".control-panel"),
+  panelTabs: document.querySelector("#panelTabs"),
+  selectionName: document.querySelector("#selectionName"),
+  selectionDrawButton: document.querySelector("#selectionDrawButton"),
+  selectionAddButton: document.querySelector("#selectionAddButton"),
+  selectionViewportButton: document.querySelector("#selectionViewportButton"),
+  selectionClearButton: document.querySelector("#selectionClearButton"),
+  selectionRangeLabel: document.querySelector("#selectionRangeLabel"),
+  selectionStatus: document.querySelector("#selectionStatus"),
+  selectionList: document.querySelector("#selectionList"),
+  selectionExportButton: document.querySelector("#selectionExportButton"),
 };
 
 const INFERNO = [
@@ -60,10 +71,19 @@ const state = {
   heatmapLayer: null,
   routeGroup: null,
   routeRenderer: null,
+  selectionRenderer: null,
   routeMode: "trace",
   enabledRoutes: {},
   rangeMin: heatmap.tmrt_min,
   rangeMax: heatmap.tmrt_max,
+  activePanelTab: "map",
+  isSelectionDrawing: false,
+  selectionStart: null,
+  selectionBounds: null,
+  selectionRectangle: null,
+  selections: [],
+  selectionGridValues: null,
+  selectionGridPromise: null,
 };
 let heatmapRedrawFrame = null;
 
@@ -198,6 +218,344 @@ function setLoading(isLoading) {
 
 function showError(show) {
   dom.errorLayer.classList.toggle("hidden", !show);
+}
+
+function setSelectionStatus(message, tone = "") {
+  if (!dom.selectionStatus) return;
+  dom.selectionStatus.textContent = message;
+  dom.selectionStatus.classList.toggle("ready", tone === "ready");
+  dom.selectionStatus.classList.toggle("warning", tone === "warning");
+}
+
+function updateSelectionPaneVisibility() {
+  if (!state.map) return;
+  const pane = state.map.getPane("selectionPane");
+  if (pane) pane.style.display = state.activePanelTab === "selection" ? "" : "none";
+}
+
+function setActivePanelTab(tab) {
+  state.activePanelTab = tab;
+  if (tab !== "selection" && state.isSelectionDrawing) {
+    setSelectionDrawing(false);
+  }
+  document.body.classList.toggle("selection-mode", tab === "selection");
+  dom.controlPanel.classList.toggle("selection-mode", tab === "selection");
+  dom.panelTabs.querySelectorAll("button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.panelTab === tab);
+  });
+  updateSelectionPaneVisibility();
+  scheduleHeatmapRedraw();
+  if (state.map) {
+    requestAnimationFrame(() => state.map.invalidateSize());
+  }
+}
+
+function setSelectionLoading(isLoading) {
+  dom.selectionAddButton.disabled = isLoading;
+  dom.selectionViewportButton.disabled = isLoading;
+  dom.selectionExportButton.disabled = isLoading || state.selections.length === 0;
+}
+
+function renderSelectionList() {
+  dom.selectionList.innerHTML = "";
+  dom.selectionExportButton.disabled = state.selections.length === 0;
+
+  if (!state.selections.length) {
+    const empty = document.createElement("p");
+    empty.className = "selection-empty";
+    empty.textContent = "Aucune zone exportable";
+    dom.selectionList.appendChild(empty);
+    return;
+  }
+
+  for (const selection of state.selections) {
+    const item = document.createElement("div");
+    item.className = "selection-item";
+
+    const title = document.createElement("strong");
+    title.textContent = selection.label;
+
+    const detail = document.createElement("span");
+    detail.textContent = `${fmtNumber(selection.points.length)} pts | moy. ${fmtTemp(selection.mean)} | ${fmtTemp(selection.min)} - ${fmtTemp(selection.max)}`;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.selectionId = selection.id;
+    button.textContent = "x";
+    button.title = "Retirer";
+
+    item.appendChild(title);
+    item.appendChild(detail);
+    item.appendChild(button);
+    dom.selectionList.appendChild(item);
+  }
+}
+
+async function loadSelectionGrid() {
+  if (state.selectionGridValues) return state.selectionGridValues;
+  if (!data.selection_grid?.url) {
+    throw new Error("Selection grid is missing.");
+  }
+  if (!state.selectionGridPromise) {
+    state.selectionGridPromise = fetch(data.selection_grid.url)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Selection grid fetch failed: ${response.status}`);
+        return response.arrayBuffer();
+      })
+      .then((buffer) => {
+        const values = new Float32Array(buffer);
+        const expectedLength = Number(data.selection_grid.rows) * Number(data.selection_grid.cols);
+        if (values.length !== expectedLength) {
+          throw new Error(`Unexpected selection grid length: ${values.length}`);
+        }
+        state.selectionGridValues = values;
+        return values;
+      });
+  }
+  return state.selectionGridPromise;
+}
+
+function clampSelectionBounds(bounds) {
+  const [[south, west], [north, east]] = data.selection_grid?.bounds || data.bounds;
+  const clampedSouth = clamp(bounds.getSouth(), south, north);
+  const clampedNorth = clamp(bounds.getNorth(), south, north);
+  const clampedWest = clamp(bounds.getWest(), west, east);
+  const clampedEast = clamp(bounds.getEast(), west, east);
+  if (clampedNorth <= clampedSouth || clampedEast <= clampedWest) return null;
+  return {
+    south: clampedSouth,
+    north: clampedNorth,
+    west: clampedWest,
+    east: clampedEast,
+  };
+}
+
+async function collectSelectionPoints(bounds) {
+  const grid = data.selection_grid;
+  if (!grid) throw new Error("Selection grid is not configured.");
+
+  const values = await loadSelectionGrid();
+  const selectedBounds = clampSelectionBounds(bounds);
+  if (!selectedBounds) {
+    return { points: [], min: NaN, max: NaN, mean: NaN };
+  }
+
+  const [[south, west], [north, east]] = grid.bounds;
+  const rows = Number(grid.rows);
+  const cols = Number(grid.cols);
+  const latStep = (north - south) / rows;
+  const lonStep = (east - west) / cols;
+  const rowMin = clamp(Math.floor((selectedBounds.south - south) / latStep), 0, rows - 1);
+  const rowMax = clamp(Math.floor((selectedBounds.north - south) / latStep), 0, rows - 1);
+  const colMin = clamp(Math.floor((selectedBounds.west - west) / lonStep), 0, cols - 1);
+  const colMax = clamp(Math.floor((selectedBounds.east - west) / lonStep), 0, cols - 1);
+  const maxExportPoints = Number(grid.max_export_points) || 150000;
+
+  const points = [];
+  let min = Infinity;
+  let max = -Infinity;
+  let sum = 0;
+
+  for (let row = rowMin; row <= rowMax; row += 1) {
+    const lat = south + (row + 0.5) * latStep;
+    const rowOffset = row * cols;
+    for (let col = colMin; col <= colMax; col += 1) {
+      const value = values[rowOffset + col];
+      if (!Number.isFinite(value)) continue;
+      if (value < state.rangeMin || value > state.rangeMax) continue;
+      if (points.length >= maxExportPoints) {
+        return { tooLarge: true, limit: maxExportPoints };
+      }
+      const lon = west + (col + 0.5) * lonStep;
+      points.push([Number(lon.toFixed(6)), Number(lat.toFixed(6)), Number(value.toFixed(2))]);
+      min = Math.min(min, value);
+      max = Math.max(max, value);
+      sum += value;
+    }
+  }
+
+  return {
+    points,
+    min,
+    max,
+    mean: points.length ? sum / points.length : NaN,
+  };
+}
+
+function selectionLabel(prefix) {
+  const value = dom.selectionName.value.trim();
+  if (value) return value;
+  return `${prefix} ${state.selections.length + 1}`;
+}
+
+async function addSelectionFromBounds(bounds, prefix) {
+  if (!bounds) {
+    setSelectionStatus("Dessiner une zone ou utiliser la vue actuelle", "warning");
+    return;
+  }
+
+  setSelectionLoading(true);
+  setSelectionStatus("Calcul...");
+  try {
+    const result = await collectSelectionPoints(bounds);
+    if (result.tooLarge) {
+      setSelectionStatus(`Zone trop large > ${fmtNumber(result.limit)} pts`, "warning");
+      return;
+    }
+    if (!result.points.length) {
+      setSelectionStatus("Aucun point dans cette plage Tmrt", "warning");
+      return;
+    }
+
+    const id = `S${Date.now()}_${state.selections.length + 1}`;
+    state.selections.push({
+      id,
+      label: selectionLabel(prefix),
+      rangeMin: state.rangeMin,
+      rangeMax: state.rangeMax,
+      points: result.points,
+      min: result.min,
+      max: result.max,
+      mean: result.mean,
+    });
+    renderSelectionList();
+    setSelectionStatus(`${fmtNumber(result.points.length)} points ajoutes`, "ready");
+  } catch (error) {
+    console.error(error);
+    setSelectionStatus("Export impossible", "warning");
+  } finally {
+    setSelectionLoading(false);
+  }
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  if (/[",\r\n]/.test(text)) return `"${text.replaceAll('"', '""')}"`;
+  return text;
+}
+
+function exportSelectionsCsv() {
+  if (!state.selections.length) {
+    setSelectionStatus("Aucune zone exportable", "warning");
+    return;
+  }
+  const lines = [
+    [
+      "selection_id",
+      "selection_label",
+      "longitude",
+      "latitude",
+      "tmrt_predite_c",
+      "tmrt_filtre_min_c",
+      "tmrt_filtre_max_c",
+    ].join(","),
+  ];
+
+  for (const selection of state.selections) {
+    for (const [lon, lat, value] of selection.points) {
+      lines.push(
+        [
+          selection.id,
+          selection.label,
+          lon,
+          lat,
+          value,
+          selection.rangeMin.toFixed(2),
+          selection.rangeMax.toFixed(2),
+        ]
+          .map(csvCell)
+          .join(","),
+      );
+    }
+  }
+
+  const blob = new Blob([`${lines.join("\r\n")}\r\n`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `picopatt_tmrt_selections_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  setSelectionStatus("CSV exporte", "ready");
+}
+
+function clearSelectionShape() {
+  if (state.selectionRectangle) {
+    state.map.removeLayer(state.selectionRectangle);
+    state.selectionRectangle = null;
+  }
+  state.selectionStart = null;
+  state.selectionBounds = null;
+  setSelectionStatus("Zone absente");
+}
+
+function setSelectionDrawing(isActive) {
+  state.isSelectionDrawing = isActive;
+  dom.selectionDrawButton.classList.toggle("active", isActive);
+  dom.leafletMap.classList.toggle("selection-active", isActive);
+  if (!state.map) return;
+  if (isActive) {
+    state.map.dragging.disable();
+    state.map.doubleClickZoom.disable();
+    setSelectionStatus("Tracer un rectangle sur la carte", "ready");
+  } else {
+    state.map.dragging.enable();
+    state.map.doubleClickZoom.enable();
+    if (!state.selectionBounds) setSelectionStatus("Zone absente");
+  }
+}
+
+function handleSelectionMouseMove(event) {
+  if (!state.selectionStart || !state.selectionRectangle) return;
+  state.selectionRectangle.setBounds(L.latLngBounds(state.selectionStart, event.latlng));
+}
+
+function handleSelectionMouseUp() {
+  state.map.off("mousemove", handleSelectionMouseMove);
+  if (!state.selectionStart || !state.selectionRectangle) {
+    setSelectionDrawing(false);
+    return;
+  }
+
+  const bounds = state.selectionRectangle.getBounds();
+  state.selectionStart = null;
+  if (
+    Math.abs(bounds.getEast() - bounds.getWest()) < 0.00005 ||
+    Math.abs(bounds.getNorth() - bounds.getSouth()) < 0.00005
+  ) {
+    clearSelectionShape();
+  } else {
+    state.selectionBounds = bounds;
+    setSelectionStatus("Zone prete a ajouter", "ready");
+  }
+  setSelectionDrawing(false);
+}
+
+function handleSelectionMouseDown(event) {
+  if (!state.isSelectionDrawing) return;
+  if (event.originalEvent?.button && event.originalEvent.button !== 0) return;
+  L.DomEvent.preventDefault(event.originalEvent);
+
+  if (state.selectionRectangle) {
+    state.map.removeLayer(state.selectionRectangle);
+  }
+  state.selectionStart = event.latlng;
+  state.selectionRectangle = L.rectangle(L.latLngBounds(event.latlng, event.latlng), {
+    className: "selection-rectangle",
+    color: "#00a77a",
+    dashArray: "6 4",
+    fillColor: "#00a77a",
+    fillOpacity: 0.12,
+    interactive: false,
+    pane: "selectionPane",
+    renderer: state.selectionRenderer,
+    weight: 2.2,
+  }).addTo(state.map);
+
+  state.map.on("mousemove", handleSelectionMouseMove);
+  state.map.once("mouseup", handleSelectionMouseUp);
 }
 
 function getRoutes() {
@@ -365,6 +723,7 @@ function updateLegendSelection(redraw = true) {
   state.rangeMin = sliderToTmrt(low);
   state.rangeMax = sliderToTmrt(high);
   dom.legendRangeLabel.textContent = `${fmtTemp(state.rangeMin)} - ${fmtTemp(state.rangeMax)}`;
+  dom.selectionRangeLabel.textContent = `${fmtTemp(state.rangeMin)} - ${fmtTemp(state.rangeMax)}`;
 
   if (redraw && state.heatmapLayer) {
     scheduleHeatmapRedraw();
@@ -403,6 +762,11 @@ function initLeafletMap() {
 
   state.map.createPane("routesPane");
   state.map.getPane("routesPane").style.zIndex = 520;
+
+  state.map.createPane("selectionPane");
+  state.map.getPane("selectionPane").style.zIndex = 640;
+  state.selectionRenderer = L.svg({ pane: "selectionPane", padding: 0.35 });
+  updateSelectionPaneVisibility();
 
   const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
     className: "satellite-tile",
@@ -457,6 +821,7 @@ function initLeafletMap() {
     .addTo(state.map);
 
   state.routeGroup = L.layerGroup([], { pane: "routesPane" }).addTo(state.map);
+  state.map.on("mousedown", handleSelectionMouseDown);
   state.map.fitBounds(state.bounds, { animate: false, padding: [18, 18] });
   renderRoutes();
 }
@@ -483,6 +848,38 @@ function bindControls() {
   dom.tmrtRangeMin.addEventListener("input", () => updateLegendSelection(true));
   dom.tmrtRangeMax.addEventListener("input", () => updateLegendSelection(true));
 
+  dom.panelTabs.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => setActivePanelTab(button.dataset.panelTab));
+  });
+
+  dom.selectionDrawButton.addEventListener("click", () => {
+    setSelectionDrawing(!state.isSelectionDrawing);
+  });
+
+  dom.selectionAddButton.addEventListener("click", () => {
+    addSelectionFromBounds(state.selectionBounds, "Zone");
+  });
+
+  dom.selectionViewportButton.addEventListener("click", () => {
+    if (!state.map) return;
+    addSelectionFromBounds(state.map.getBounds(), "Vue");
+  });
+
+  dom.selectionClearButton.addEventListener("click", () => {
+    clearSelectionShape();
+    setSelectionDrawing(false);
+  });
+
+  dom.selectionExportButton.addEventListener("click", exportSelectionsCsv);
+
+  dom.selectionList.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-selection-id]");
+    if (!button) return;
+    state.selections = state.selections.filter((selection) => selection.id !== button.dataset.selectionId);
+    renderSelectionList();
+    setSelectionStatus(state.selections.length ? `${fmtNumber(state.selections.length)} zones exportables` : "Aucune zone exportable");
+  });
+
   dom.routeModeControls.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", () => {
       state.routeMode = button.dataset.routeMode;
@@ -507,5 +904,6 @@ showError(false);
 updateDataPanel();
 updateLegendSelection(false);
 renderRouteControls();
+renderSelectionList();
 bindControls();
 initLeafletMap();

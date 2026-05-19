@@ -6,7 +6,7 @@
   <title>PICOPATT - Carte Tmrt</title>
   <link rel="icon" href="data:," />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=selection-buttons-v2-20260519" />
 </head>
 <body>
   <main class="app-shell">
@@ -16,7 +16,12 @@
         <h1>PICOPATT</h1>
       </div>
 
-      <section class="control-group route-control-group" aria-labelledby="routes-title">
+      <div class="panel-tabs" id="panelTabs" aria-label="Modes">
+        <button type="button" class="active" data-panel-tab="map">Carte</button>
+        <button type="button" data-panel-tab="selection">S&eacute;lection</button>
+      </div>
+
+      <section class="control-group route-control-group map-tab-section" aria-labelledby="routes-title">
         <h2 id="routes-title">Parcours</h2>
         <div class="route-mode" id="routeModeControls" aria-label="Mode d'affichage des parcours">
           <button type="button" class="active" data-route-mode="trace">Tracé</button>
@@ -28,7 +33,7 @@
         <p class="route-note" id="routeNote">-</p>
       </section>
 
-      <section class="scenario-panel heatmap-data" aria-live="polite">
+      <section class="scenario-panel heatmap-data map-tab-section" aria-live="polite">
         <div>
           <p class="eyebrow">Raster</p>
           <h2 id="scenarioTitle">CatBoost - grille 10 m</h2>
@@ -54,7 +59,7 @@
         <p class="scenario-date" id="scenarioDate">-</p>
       </section>
 
-      <section class="model-panel">
+      <section class="model-panel map-tab-section">
         <div class="model-row">
           <span>Grille</span>
           <strong id="gridPoints">-</strong>
@@ -67,6 +72,30 @@
           <span>Modele</span>
           <strong id="scenarioCount">-</strong>
         </div>
+      </section>
+
+      <section class="control-group selection-control-group selection-tab-section" aria-labelledby="selection-title">
+        <h2 id="selection-title">Zone exportable</h2>
+        <input id="selectionName" class="selection-name" type="text" maxlength="48" placeholder="Nom de la selection" />
+        <div class="selection-actions">
+          <button type="button" id="selectionDrawButton" class="selection-tool">Dessiner</button>
+          <button type="button" id="selectionViewportButton" class="selection-tool">Vue actuelle</button>
+          <button type="button" id="selectionAddButton" class="selection-primary">Ajouter</button>
+          <button type="button" id="selectionClearButton" class="selection-clear">Retirer zone</button>
+        </div>
+        <div class="selection-readout">
+          <span>Plage Tmrt</span>
+          <strong id="selectionRangeLabel">-</strong>
+        </div>
+        <p class="selection-status" id="selectionStatus">Zone absente</p>
+      </section>
+
+      <section class="selection-panel selection-tab-section" aria-live="polite">
+        <div class="selection-list-header">
+          <h2>Export CSV</h2>
+          <button type="button" id="selectionExportButton">CSV</button>
+        </div>
+        <div class="selection-list" id="selectionList"></div>
       </section>
     </aside>
 
@@ -103,7 +132,7 @@
             </div>
             <span id="legendMax">-</span>
           </div>
-          <div class="legend-filter">Affiché : <strong id="legendRangeLabel">-</strong></div>
+          <div class="legend-filter">Affich&eacute; : <strong id="legendRangeLabel">-</strong></div>
         </div>
         <label class="opacity-control">
           <span>Heatmap</span>
@@ -115,7 +144,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
-  <script src="./scenario-data.js?v=restored-leaflet-20260518"></script>
-  <script src="./app.js?v=restored-leaflet-20260518"></script>
+  <script src="./scenario-data.js?v=selection-20260519"></script>
+  <script src="./app.js?v=selection-tabs-20260519"></script>
 </body>
 </html>
