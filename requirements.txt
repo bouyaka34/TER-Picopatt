@@ -10,3 +10,4 @@ branca
 catboost
 folium
 pillow
+pvlib

@@ -31,7 +31,7 @@
   style=numeric,
   sorting=none
 ]{biblatex}
-\addbibresource{rapport/s2/references.bib}
+\addbibresource{references.bib}
 \usepackage{titlesec}
 \renewcommand{\thesection}{\arabic{section}.}
 \renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}.}
@@ -78,7 +78,12 @@
   Sandra BRINGAY,\\
   Luc Étienne POMMÉ-CASSIÉROU,\\
   Vincent RAVENEAU,\\
-  et Maximillien SERVAJEAN\\[0.8cm]
+  et Maximillien SERVAJEAN\\[0.45cm]
+
+  \rule{0.5\textwidth}{0.9pt}\\[0.25cm]
+
+  Dépôt GitHub\\[0.1cm]
+  \href{https://github.com/bouyaka34/TER-Picopatt}{github.com/bouyaka34/TER-Picopatt}\\[0.65cm]
 
   \begin{minipage}[c]{0.3\textwidth}
     \centering
@@ -108,9 +113,11 @@
 \end{center}
 
 \vspace{1cm}
-Nous tenons à remercier nos encadrants, Sandra Bringay, Luc Étienne Pommé-Cassiérou, Vincent Raveneau et Maximillien Servajean, pour leur suivi tout au long du semestre. Leurs retours nous ont permis de mieux structurer le travail, de préciser les objectifs de modélisation et de prendre plus de recul sur l'évaluation des résultats.
+Nous tenons d'abord à remercier nos encadrants, Sandra Bringay, Luc Étienne Pommé-Cassiérou, Vincent Raveneau et Maximillien Servajean, pour leur accompagnement tout au long du semestre. Leurs retours, leurs questions et les échanges réguliers avec eux ont vraiment guidé l'avancement du projet. Ils nous ont aidés à mieux cadrer le sujet, à comprendre les limites des données, à préciser le rôle du modèle et à construire une évaluation plus sérieuse des résultats.
 
-Nous remercions également les personnes impliquées dans le projet PICOPATT pour les données, les outils et le contexte scientifique mis à disposition. Ces éléments ont été indispensables pour passer de l'analyse exploratoire menée au S1 à une démarche de prédiction et de spatialisation au S2.
+Nous remercions plus particulièrement Maximillien Servajean pour ses explications sur les données non indépendantes et sur la signification de l'hypothèse \texttt{i.i.d.}. Ces échanges ont été importants pour comprendre pourquoi une séparation aléatoire des lignes ne suffisait pas dans notre cas.
+
+Nous remercions également Daniel Siret et Ignacio Requena Ruiz, chercheurs à l'AAU et grandement impliqués dans le projet PICOPATT, pour leur disponibilité. Leurs réponses nous ont permis de mieux comprendre la liste des variables, leur rôle dans la station mobile et certaines informations utiles sur les données.
 
 \newpage
 \hypersetup{pageanchor=true}
@@ -126,23 +133,38 @@ Nous remercions également les personnes impliquées dans le projet PICOPATT pou
 
 Le TER s'inscrit dans le projet PICOPATT, qui étudie les picoclimats urbains à partir de mesures mobiles réalisées dans la ville \cite{picopatt-site}. Dès le début du projet, la mission principale était de partir des séries temporelles produites par le chariot pour mieux identifier et caractériser ces situations climatiques très locales. Les données ne devaient donc pas être seulement décrites point par point. Elles devaient être transformées en profils plus lisibles, capables de résumer la dynamique d'un passage et de faire apparaître des formes récurrentes.
 L'objectif initial reposait sur la construction de silhouettes picoclimatiques. Une silhouette correspond à un profil typique, obtenu à partir de mesures qui se ressemblent dans l'espace et dans le temps. Cette idée devait servir de base à des tâches plus avancées comme la comparaison de passages, la classification de contextes, la détection d'anomalies ou la prévision. Les premières étapes prévues concernaient donc le nettoyage des séries, la gestion des valeurs manquantes, la segmentation des parcours, le calcul de statistiques simples et la visualisation des profils. Dans un second temps, des modèles d'apprentissage de représentations pouvaient être envisagés pour apprendre automatiquement des profils compacts.
-
 Cette mission a évolué au contact des données réellement disponibles. Les mesures PICOPATT sont riches, mais elles sont aussi très denses et fortement liées au parcours suivi. Le travail du S2 reprend donc la question de la représentation des profils, mais sous un angle plus opérationnel. Il cherche à savoir si certaines variables disponibles au-delà du seul chariot peuvent aider à prédire \texttt{tmrt}, puis à produire une carte dense de cette variable sur Montpellier.
+\hyperref[fig:chariot-picopatt]{La figure~\ref{fig:chariot-picopatt}} montre la station mobile utilisée pendant les campagnes. Elle rappelle que les données du projet proviennent d'une mesure embarquée, réalisée le long de parcours précis.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{rapport/s2/Images/Chariot/photo-picopatt-arc-triomphe.jpg}
+    \caption{Vue de face.}
+\end{subfigure}
+\hspace{0.07\textwidth}
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{rapport/s2/Images/Chariot/chariot-antigone.jpg}
+    \caption{Vue de profil.}
+\end{subfigure}
+\caption{Chariot de mesure utilisé dans le projet PICOPATT.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : AAU - ENSA Nantes.}
+\label{fig:chariot-picopatt}
+\end{figure}
 
 \subsection{Continuité avec le rapport S1}
 
 Le Semestre 1 s'arrêtait sur la compréhension des mesures. Il mettait en évidence des profils cohérents avec la morphologie des parcours et avec la dynamique journalière. Les variables radiatives, en particulier les composantes de rayonnement solaire, apparaissaient fortement liées à \texttt{tmrt}. Les analyses par \texttt{M\_slot} (passage à différentes heures pour un même parcours) montraient aussi que certains motifs reviennent aux mêmes zones du trajet, tandis que le niveau moyen change selon la date, l'heure et les conditions météorologiques.
-
 Le Semestre 2 reprend à cet endroit. Il ne repart pas de zéro et ne remplace pas les analyses du S1. Il s'appuie sur elles pour passer d'une lecture exploratoire des profils à une question de modélisation. La difficulté devient alors plus précise : construire un modèle utile sans utiliser uniquement des variables que l'on ne peut mesurer qu'avec le chariot. Cette contrainte est centrale, car l'objectif n'est pas seulement de retrouver les points déjà parcourus, mais de préparer une prédiction plus dense dans l'espace.
-
 Ce rapport suit donc volontairement l'ordre chronologique du semestre. Il commence par les données retenues et les raisons de ces choix. Il présente ensuite le premier modèle testé, les problèmes rencontrés pendant son évaluation, les solutions mises en place, puis la construction de la heatmap et de l'application web.
 
 \subsection{Rappel du projet PICOPATT}
 
 PICOPATT étudie les variations locales du climat urbain à une échelle très fine. Le projet s'intéresse aux différences que l'on peut observer entre une rue étroite, une place ouverte, un axe urbain plus large ou un espace plus exposé au vent. Ces différences peuvent être importantes pour les piétons, car elles modifient l'exposition au soleil, la ventilation, l'humidité locale et le confort thermique ressenti.
-
 À Montpellier, les mesures utilisées dans le projet proviennent d'une station météorologique mobile installée sur un chariot. Les parcours étudiés sont au nombre de trois : Écusson, Boulevards et Antigone. Ces trois parcours représentent des formes urbaines contrastées. L'Écusson correspond à un tissu plus ancien et plus encaissé, les Boulevards alternent des axes et des espaces plus ouverts, tandis qu'Antigone présente des espaces plus larges et plus réguliers. Cette diversité donne un cadre pertinent pour observer des contrastes picoclimatiques.
-
 Les photographies de \hyperref[fig:photos_parcours]{la figure~\ref{fig:photos_parcours}} illustrent ces trois contextes urbains.
 
 \begin{figure}[H]
@@ -212,13 +234,9 @@ Les tracés de \hyperref[fig:traces-parcours]{la figure~\ref{fig:traces-parcours
 \subsection{État de l'art ciblé}
 
 Les travaux sur les climats urbains montrent que les conditions thermiques locales dépendent fortement de la morphologie urbaine, de la couverture du sol, des matériaux et des usages. Les Local Climate Zones constituent un cadre classique pour décrire les grands contrastes entre tissus urbains \cite{stewart-oke-2012}. Ce cadre est utile pour comparer des quartiers ou des formes urbaines générales, mais PICOPATT se place à une échelle plus fine. Le projet observe la rue, la place, la façade, l'ombre portée et la position du piéton dans le parcours. À cette échelle, deux points proches peuvent déjà correspondre à des conditions radiatives différentes.
-
 Cette différence d'échelle explique l'intérêt des mesures mobiles. Une station fixe décrit bien un point, mais elle ne suffit pas à suivre les variations rencontrées par un piéton en mouvement. Le chariot PICOPATT permet au contraire d'enregistrer des profils continus le long de parcours répétés. Cette approche est adaptée à l'étude des picoclimats, car elle conserve la forme du signal et les ruptures locales. Elle pose aussi une difficulté méthodologique importante. Les observations successives sont très proches dans le temps et dans l'espace, donc elles ne peuvent pas être traitées comme des points indépendants.
-
 La variable \texttt{tmrt} occupe une place centrale dans l'analyse du confort thermique extérieur. Elle synthétise l'effet radiatif de l'environnement sur un individu et intervient dans des indices de confort comme \texttt{PET}. Son estimation reste délicate, car les méthodes fondées sur les mesures radiatives complètes, les globes noirs ou les modèles radiatifs ne sont pas équivalentes \cite{kruger-2014-tmrt}. Pour ce projet, ce point est essentiel. \texttt{tmrt} réagit fortement à l'ombre, à l'exposition solaire et aux surfaces urbaines proches. Elle est donc pertinente pour caractériser les contrastes locaux, mais elle est plus difficile à prédire qu'une variable atmosphérique plus lisse comme la température de l'air.
-
 Le passage vers la modélisation impose aussi de distinguer les variables que l'on peut mesurer seulement sur les parcours et celles que l'on peut utiliser ailleurs. Les flux radiatifs embarqués décrivent très bien les points parcourus, mais ils ne sont pas disponibles sur toute la ville. Les variables météorologiques horaires donnent un contexte atmosphérique plus général, tandis que les embeddings géospatiaux AlphaEarth fournissent une description spatiale issue de données d'observation de la Terre \cite{brown-2025-alphaearth}. Le jeu Satellite Embedding V1 disponible dans Google Earth Engine rend ces représentations exploitables sur des points géographiques réguliers \cite{google-earth-engine-satellite-embedding}. Dans le cadre du S2, ces éléments servent à relier la mission initiale de représentation des profils à une question plus large de spatialisation.
-
 Enfin, l'évaluation d'un modèle sur ce type de données doit tenir compte de leur structure. Un découpage aléatoire ligne par ligne peut mélanger des points presque identiques entre l'entraînement et le test. Il donne alors une performance rassurante, mais peu informative sur la capacité du modèle à généraliser à un autre passage ou à une autre journée. Les validations par groupes, comme \texttt{GroupShuffleSplit}, apportent un cadre plus adapté lorsque les observations appartiennent à des blocs temporels ou spatiaux \cite{scikit-group-shuffle-split}. Cette question devient un point central du S2, car la qualité apparente du modèle dépend fortement de la manière dont on le teste.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -229,7 +247,19 @@ Enfin, l'évaluation d'un modèle sur ce type de données doit tenir compte de l
 
 \subsection{Variables mesurées par PICOPATT}
 
-La première base du S2 est constituée des mesures PICOPATT nettoyées issues des trois parcours montpelliérains. Le jeu utilisé pour l'entraînement contient \(341\,281\) lignes. Ces lignes correspondent aux observations successives du chariot sur les parcours Écusson, Boulevards et Antigone.
+La première base du S2 est constituée des mesures PICOPATT nettoyées issues des trois parcours montpelliérains. Le jeu utilisé pour l'entraînement contient \(341\,281\) lignes. Ces lignes correspondent aux observations successives du chariot sur les parcours Écusson, Boulevards et Antigone. \hyperref[fig:tmrt-distribution-observee]{La figure~\ref{fig:tmrt-distribution-observee}} présente la distribution de \texttt{tmrt} observée selon les parcours et selon les créneaux de mesure. Elle montre que la cible n'a pas le même niveau ni la même dispersion partout.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{rapport/s2/Images/Graphiques/tmrt_observed_distribution_track_mslot.png}
+\caption{Variabilité observée de \texttt{tmrt} dans les mesures PICOPATT.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : figure obtenue lors du Semestre 1.}
+\label{fig:tmrt-distribution-observee}
+\end{figure}
+
+Les mesures PICOPATT donnent une description très complète de ce qui est rencontré sur le terrain. Elles contiennent à la fois la position du chariot, les informations de passage, les variables atmosphériques mesurées localement, les flux radiatifs et les indices de confort. Cette richesse explique pourquoi ces données sont centrales dans le projet. Elle explique aussi la difficulté rencontré durant le S2, toutes ces variables ne peuvent pas être connues sur une grille couvrant toute la ville.
+\hyperref[tab:variables_picopatt]{La table~\ref{tab:variables_picopatt}} reprend les principales familles de variables disponibles dans les mesures PICOPATT.
 
 \begin{table}[H]
 \centering
@@ -273,9 +303,6 @@ Variables décrivant la position du soleil au moment de la mesure. Elles aident 
 \label{tab:variables_picopatt}
 \end{table}
 
-Les mesures PICOPATT donnent une description très complète de ce qui est rencontré sur le terrain. Elles contiennent à la fois la position du chariot, les informations de passage, les variables atmosphériques mesurées localement, les flux radiatifs et les indices de confort. Cette richesse explique pourquoi ces données sont centrales dans le projet. Elle explique aussi la difficulté rencontré durant le S2, toutes ces variables ne peuvent pas être connues sur une grille couvrant toute la ville.
-\hyperref[tab:variables_picopatt]{Le tableau~\ref{tab:variables_picopatt}} reprend les principales familles de variables disponibles dans les mesures PICOPATT.
-
 \subsection{Variables PICOPATT retenues pour le modèle}
 
 Le passage à la prédiction oblige à distinguer deux usages des données PICOPATT. Le premier usage est descriptif. Il consiste à comprendre finement les profils mesurés sur les parcours. Dans ce cadre, les flux radiatifs et les capteurs du chariot sont très précieux. Le second usage est prédictif. Il consiste à construire un modèle pouvant être appliqué sur une grille de Montpellier. Dans ce cadre, une variable ne peut être utilisée en entrée que si elle est disponible aussi sur les points où le chariot n'est jamais passé. C'est pour cette raison que le modèle final ne reprend pas directement les mesures radiatives embarquées comme variables explicatives. Elles sont très liées à \texttt{tmrt}, mais elles ne sont disponibles que là où le chariot a mesuré. Les utiliser aurait rendu le modèle plus performant sur les parcours connus, mais beaucoup moins utile pour produire une heatmap sur toute la ville. \hyperref[tab:variables-picopatt-modele]{Le tableau~\ref{tab:variables-picopatt-modele}} résume le rôle des variables PICOPATT dans la modélisation.
@@ -318,7 +345,7 @@ Les variables utilisées proviennent des données horaires de climatologie acces
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.65\textwidth]{rapport/s2/Images/Prediction/mf_screen.png}
+\includegraphics[width=0.45\textwidth]{rapport/s2/Images/Prediction/mf_screen.png}
 \caption{Capture d'écran du portail API Météo-France.}
 \vspace{-0.35cm}
 \caption*{\footnotesize Source : Météo-France \cite{meteofrance-donnees-horaires}.}
@@ -385,7 +412,7 @@ AlphaEarth Foundations produit des représentations géospatiales apprises à pa
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.65\textwidth]{rapport/s2/Images/Prediction/ae_screen.png}
+\includegraphics[width=0.75\textwidth]{rapport/s2/Images/Prediction/ae_screen.png}
 \caption{Capture d'écran de l'interface Google Earth Engine.}
 \vspace{-0.35cm}
 \caption*{\footnotesize Source : Google Earth Engine, Satellite Embedding V1 \cite{google-earth-engine-satellite-embedding}.}
@@ -426,20 +453,54 @@ Cette logique prépare directement la suite du rapport. Le modèle ne cherche pa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 
-\section{Première modélisation}
+\section{Première modélisation : HistGradientBoostingRegressor}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Une première tentative directe}
 
-La section précédente a défini un jeu de données volontairement contraint. Les mesures PICOPATT donnent la valeur cible \texttt{tmrt}, mais les variables d'entrée doivent rester disponibles hors des parcours. La première modélisation part de cette contrainte et cherche à tester une idée simple : peut-on prédire \texttt{tmrt} à partir d'un contexte météorologique Météo-France et d'une description spatiale AlphaEarth, sans utiliser directement les flux radiatifs mesurés par le chariot.
-Le premier modèle principal du S2 est un \texttt{HistGradientBoostingRegressor} \cite{scikit-hist-gradient-boosting}. Ce choix était cohérent avec le type de données disponibles. Le problème est tabulaire, le nombre de lignes est important et les relations entre météo, contexte spatial et \texttt{tmrt} ne sont pas linéaires. Ce type de modèle permet donc de commencer sans supposer une relation linéaire entre les variables.
-Cette première étape a surtout servi à passer de l'analyse exploratoire du S1 à une vraie logique de prédiction. Elle a permis de vérifier que le problème pouvait être formulé comme une régression supervisée, avec une cible, des variables explicatives et une procédure d'évaluation. Elle avait cependant une faiblesse importante : elle traitait encore trop facilement les lignes comme si elles représentaient des observations séparées.
+Lors de la section précédente, le travail réalisé a été de construire un jeu de données volontairement contraint. Les mesures PICOPATT donnent la cible \texttt{tmrt}, mais les variables d'entrée doivent rester disponibles hors des parcours. Le premier modèle part donc d'une question simple : peut-on prédire \texttt{tmrt} avec un contexte météorologique Météo-France et une description spatiale AlphaEarth, sans utiliser directement les flux radiatifs mesurés par le chariot.
+Le premier modèle principal du S2 est un \texttt{HistGradientBoostingRegressor} \cite{scikit-hist-gradient-boosting}. Ce choix était cohérent avec le problème. Les données sont tabulaires, le nombre de lignes est élevé et les relations entre météo, contexte spatial et \texttt{tmrt} ne sont pas linéaires. Ce modèle permettait donc de tester rapidement une première régression sans imposer une forme linéaire aux effets du rayonnement, de l'heure, de la température ou de la morphologie urbaine.
+Cette première étape a surtout servi à vérifier que le pipeline fonctionnait. Les données PICOPATT ont été jointes aux données Météo-France, puis aux embeddings AlphaEarth. Le modèle a ensuite été évalué avec trois jeux de variables : Météo-France seul, Météo-France avec les 64 dimensions AlphaEarth et Météo-France avec une version réduite des embeddings par ACP.
+
+\subsection{Premier rôle des embeddings AlphaEarth}
+
+L'un des premiers tests a consisté à savoir si les embeddings AlphaEarth apportaient réellement une information utile. Le modèle utilisant seulement les variables Météo-France obtient une RMSE de 8,07 \(^{\circ}\mathrm{C}\). L'ajout des 64 dimensions AlphaEarth descend la RMSE à 6,29 \(^{\circ}\mathrm{C}\). Cela montre que la description spatiale aide le modèle à mieux expliquer \texttt{tmrt}.
+Une ACP a ensuite été testée pour résumer les 64 dimensions AlphaEarth. L'idée était de réduire le nombre de variables tout en conservant l'information principale. Cette piste n'a pas vraiment amélioré le modèle. Avec les 10 composantes principales, la MAE reste proche de celle obtenue avec les 64 dimensions, mais la RMSE et le \(R^2\) sont moins bons. Pour la suite, les 64 dimensions brutes ont donc été conservées.
+\hyperref[tab:premiers-jeux-prediction]{Le tableau~\ref{tab:premiers-jeux-prediction}} présente les premiers résultats obtenus avec ces trois jeux de variables.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Jeu de variables & MAE & RMSE & \(R^2\) \\
+\midrule
+\texttt{MF\_only} & 5,20 & 8,07 & 0,344 \\
+\texttt{MF\_plus\_AE\_PCA10} & 4,02 & 6,53 & 0,571 \\
+\texttt{MF\_plus\_AE\_raw64} & 4,04 & 6,29 & 0,601 \\
+\bottomrule
+\end{tabular}
+\caption{Premiers essais de prédiction de \texttt{tmrt} avec Météo-France et AlphaEarth.}
+\label{tab:premiers-jeux-prediction}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : export \texttt{tmrt\_pred\_global\_results.csv}, généré par \texttt{Prediction\_colab\_version.ipynb}.}
+\end{table}
+
+\hyperref[fig:mae-alphaearth-acp]{La figure~\ref{fig:mae-alphaearth-acp}} illustre le même constat avec les trois métriques principales. L'ACP permet de compacter l'information, mais elle ne donne pas une amélioration assez nette pour remplacer les 64 dimensions brutes.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{rapport/s2/Images/Modelisation/alphaearth_sets_comparison_results.png}
+\caption{Comparaison des premiers jeux de variables testés.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : figure générée dans \texttt{Prediction\_visualisation.ipynb} à partir de \texttt{tmrt\_pred\_global\_results.csv}.}
+\label{fig:mae-alphaearth-acp}
+\end{figure}
 
 \subsection{Une évaluation d'abord trop favorable}
 
-Le premier obstacle n'a donc pas été seulement le choix du modèle. Le vrai problème est venu de l'évaluation. Les mesures du chariot sont prises à une fréquence élevée. Beaucoup de points successifs sont presque au même endroit, au même moment, avec les mêmes variables météo et des embeddings AlphaEarth identiques ou très proches.
-Dans ces conditions, un split aléatoire ligne par ligne peut mélanger dans l'entraînement et dans le test des points presque voisins. Le modèle peut alors sembler bon parce qu'il retrouve des situations déjà vues de manière très proche. Ce résultat reste utile pour vérifier que le pipeline fonctionne, mais il ne répond pas à la question centrale du S2. Ce que l'on veut savoir, c'est si le modèle peut généraliser à un nouveau passage, à une autre journée ou à un contexte spatial moins directement représenté dans l'entraînement.
-Cette limite change la manière de lire les premiers résultats. Une bonne performance sur un split aléatoire ne suffit pas à valider le modèle. Elle peut simplement indiquer que les données sont très redondantes. La première modélisation a donc joué un rôle utile, mais surtout comme révélateur de la structure du jeu de données.
+Le premier obstacle n'a pas été seulement le choix du modèle. Le vrai problème est venu de l'évaluation. Les mesures du chariot sont prises à une fréquence élevée. Beaucoup de points successifs sont presque au même endroit, au même moment, avec les mêmes variables météo et des embeddings AlphaEarth identiques ou très proches.
+Dans ces conditions, un split aléatoire ligne par ligne peut mélanger dans l'entraînement et dans le test des points presque voisins. Le modèle peut alors sembler performant parce qu'il retrouve des situations déjà vues. Ce résultat reste utile pour vérifier que le pipeline fonctionne, mais il ne répond pas à la question centrale du S2. Il faut savoir si le modèle peut généraliser à un nouveau passage, à une autre journée ou à un contexte spatial moins directement représenté dans l'entraînement.
 
 \subsection{Diagnostic : des observations non indépendantes}
 
@@ -467,11 +528,12 @@ Autocorrélation de \texttt{tmrt} au lag 10 & 0,869 \\
 \label{tab:non-iid}
 \end{table}
 
+\newpage
 \hyperref[fig:non-iid]{La figure~\ref{fig:non-iid}} complète ce diagnostic avec la taille des groupes et l'autocorrélation de \texttt{tmrt}.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}[b]{0.75\textwidth}
+\begin{subfigure}[b]{0.95\textwidth}
   \centering
   \includegraphics[width=\textwidth]{rapport/s2/Images/Prediction/points_by_group.png}
   \caption{Nombre de points par groupe.}
@@ -488,7 +550,7 @@ Autocorrélation de \texttt{tmrt} au lag 10 & 0,869 \\
 \label{fig:non-iid}
 \end{figure}
 
-Ce diagnostic donne le point de bascule entre les deux sections. La première modélisation pose le problème et montre que le pipeline fonctionne. Elle montre aussi que les métriques peuvent être trop optimistes si l'on ignore la structure spatio-temporelle des mesures. La suite du semestre répond à ce problème en rendant l'évaluation plus prudente, en réduisant la redondance et en stabilisant le modèle final.
+Cette première modélisation a donc eu un rôle utile, mais pas comme résultat final. Elle a montré que les variables générales expliquent une partie de \texttt{tmrt}. Elle a aussi montré que les métriques peuvent devenir trop optimistes si l'on oublie la dépendance spatiale et temporelle des observations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -496,31 +558,111 @@ Ce diagnostic donne le point de bascule entre les deux sections. La première mo
 \section{Solutions apportées}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Répondre aux limites de la première tentative}
+\subsection{Améliorer le modèle initial sans changer le problème}
 
-La section précédente montre une première approche directe : un jeu de variables généralisable, un modèle à arbres boostés et une évaluation encore trop proche d'un découpage ligne par ligne. Les solutions apportées prennent le problème dans l'autre sens. Elles ne cherchent pas seulement à améliorer le score. Elles cherchent à vérifier si le modèle reste crédible quand on l'évalue dans des conditions plus proches de l'usage attendu.
-Le modèle doit rester applicable hors des parcourset l'évaluation doit éviter de confondre redondance locale et capacité de généralisation. Les réponses mises en place portent sur quatre points : le découpage des données, la granularité des observations, le choix du modèle final et la qualité des variables Météo-France.
+La première série de pistes a cherché à améliorer le modèle original. L'objectif était de voir si le score pouvait progresser en enrichissant les variables, en ajustant les hyperparamètres ou en corrigeant un décalage global des prédictions. Ces essais correspondent aux pistes 1 à 5 du notebook \texttt{Prediction.ipynb}.
+La piste 1 ajoute des variables dérivées. Elle introduit par exemple des variables temporelles plus fines, une température apparente et des interactions entre vent et rayonnement. L'objectif était de tester si des transformations physiques simples pouvaient compléter les variables Météo-France et AlphaEarth, sans revenir aux mesures radiatives du chariot.
+La piste 2 teste plusieurs réglages de \texttt{HistGradientBoostingRegressor}. La meilleure configuration de cette étape atteint une RMSE de 5,83 \(^{\circ}\mathrm{C}\). La piste 3 applique ensuite une correction constante aux prédictions. Elle donne la meilleure RMSE de cette série, avec 5,73 \(^{\circ}\mathrm{C}\), mais ce résultat doit être fortement relativisé. Cette correction ne change pas ce que le modèle apprend. Elle ajoute seulement un décalage après coup, dépendant du jeu évalué. Elle peut donc améliorer une métrique sans améliorer la capacité du modèle à comprendre les contrastes locaux. Pour cette raison, elle n'a pas été retenue comme vraie solution de modélisation. La piste 4 teste un petit ensemble de modèles avec plusieurs graines aléatoires. Elle donne un résultat proche, sans gain suffisant. La piste 5 sert plutôt à interpréter le modèle, grâce à une importance par permutation.
+\hyperref[tab:pistes-histgbr]{Le tableau~\ref{tab:pistes-histgbr}} résume ces pistes. Elles ont aidé à comprendre le modèle, mais elles n'ont pas réglé le problème principal de l'évaluation.
 
-\subsection{Validation par groupes}
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{0.28\textwidth}rrrY}
+\toprule
+Essai & MAE & RMSE & \(R^2\) & Lecture \\
+\midrule
+Variables initiales \texttt{MF+AE64} & 4,04 & 6,30 & 0,600 & Référence avec embeddings bruts. \\
+Variables enrichies et modèle ajusté & 3,83 & 5,75 & 0,667 & Gain réel, mais encore évalué sur un split favorable. \\
+Meilleur réglage de la piste 2 & 3,84 & 5,83 & 0,658 & Amélioration limitée par rapport aux variables enrichies. \\
+Correction constante des prédictions & 3,79 & 5,73 & 0,670 & Score plus bas, mais correction ajoutée après prédiction. \\
+Ensemble avec correction constante & 3,83 & 5,74 & 0,668 & Résultat proche, sans gain net. \\
+\bottomrule
+\end{tabularx}
+\caption{Essais d'amélioration autour du premier modèle \texttt{HistGradientBoostingRegressor}.}
+\label{tab:pistes-histgbr}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : exports \texttt{tmrt\_pred\_improved\_results.csv} et \texttt{tmrt\_all\_models\_results.csv}.}
+\end{table}
 
-La première réponse a été de comparer plusieurs stratégies de validation. Le split \texttt{random\_row} a été conservé comme référence naïve, car il donne le résultat lorsque les lignes sont mélangées aléatoirement. Le split \texttt{passage\_group} sépare les passages. Le split \texttt{day\_track\_group} est plus strict, car il sépare des blocs définis par parcours et jour. Cette logique rejoint le principe des validations par groupes, comme \texttt{GroupShuffleSplit} dans scikit-learn \cite{scikit-group-shuffle-split}.
-Cette évolution est importante. Elle ne cherche pas à rendre les résultats plus flatteurs, mais plus crédibles. Si le score baisse avec les splits groupés, cela signifie surtout que le split aléatoire répondait à une question trop facile. Ce n'est donc pas un échec du modèle en soi. C'est une mesure plus honnête de ce qu'il sait faire lorsqu'il rencontre un passage ou une journée qu'il n'a pas appris ligne par ligne.
+Ces pistes montrent une amélioration progressive, mais elles restent insuffisantes pour conclure. Elles travaillent surtout sur le modèle et les variables. Or le diagnostic précédent montre que la question centrale est aussi celle du découpage des données.
 
-\subsection{Agrégation spatiale des points}
+\subsection{Tester un split spatial fixe}
 
-La deuxième réponse a été de réduire la redondance des points en agrégeant les mesures par passage tous les 10 m ou 20 m. Sur les points bruts, le jeu contient \(341\,281\) lignes. Après agrégation à 10 m, il contient \(22\,185\) lignes. Après agrégation à 20 m, il contient \(11\,224\) lignes.
-Cette étape répond directement au diagnostic d'autocorrélation. Elle n'a pas été pensée comme un moyen de supprimer de l'information utile. Elle sert à éviter qu'un paquet de points presque identiques pèse trop lourd dans l'entraînement et dans les métriques. Elle permet aussi de tester si le modèle apprend des tendances spatiales plus stables, au lieu de répéter des variations locales observées toutes les secondes.
+La piste suivante a donc changé l'évaluation. Un split spatial fixe a été testé, avec Écusson pour l'entraînement, Boulevards pour la validation et Antigone pour le test. Cette configuration est volontairement sévère, car elle demande au modèle d'apprendre sur un seul parcours puis de se généraliser à d'autres tissus urbains.
+Le résultat n'a pas été retenu comme modèle final. La validation sur Boulevards donne une RMSE de 6,50 \(^{\circ}\mathrm{C}\), puis le test sur Antigone monte à 7,54 \(^{\circ}\mathrm{C}\). Le grid search associé n'a pas vraiment résolu cette difficulté. Il a même montré un écart important entre l'entraînement et la validation, avec une RMSE d'entraînement proche de 1,70 \(^{\circ}\mathrm{C}\) pour la meilleure configuration et une RMSE de validation à 6,50 \(^{\circ}\mathrm{C}\).
+\hyperref[tab:split-spatial-fixe]{Le tableau~\ref{tab:split-spatial-fixe}} présente les résultats de ce split spatial fixe.
 
-\subsection{Passage vers CatBoost}
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Split & Parcours & Lignes & MAE & RMSE & \(R^2\) \\
+\midrule
+Validation & Boulevards & \(115\,962\) & 3,85 & 6,50 & 0,342 \\
+Test & Antigone & \(121\,457\) & 5,16 & 7,54 & 0,439 \\
+\bottomrule
+\end{tabular}
+\caption{Résultats du split spatial fixe avec \texttt{HistGradientBoostingRegressor}.}
+\label{tab:split-spatial-fixe}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : export \texttt{tmrt\_spatial\_split\_metrics.csv}.}
+\end{table}
 
-La troisième réponse concerne le modèle. Après le premier cadre construit avec \texttt{HistGradientBoosting}, le travail a évolué vers \texttt{CatBoost} \cite{catboost-2018}. Ce changement ne correspond pas à un abandon complet de l'approche précédente. Les deux modèles restent des modèles à arbres boostés, adaptés aux données tabulaires et aux relations non linéaires.
-L'intérêt de cette évolution est de stabiliser le modèle utilisé pour la suite du travail, notamment pour la carte à 10 m. Dans le projet, \texttt{CatBoostRegressor} est réentraîné sur les \(341\,281\) lignes PICOPATT avec le jeu enrichi de 118 variables, sans coordonnées géographiques en entrée. Il devient donc le modèle utilisé pour passer de la prédiction sur les parcours à la spatialisation.
+\hyperref[fig:spatial-gridsearch-gap]{La figure~\ref{fig:spatial-gridsearch-gap}} montre pourquoi le grid search associé à ce split spatial fixe n'a pas suffi. Les configurations testées ont une erreur très faible en entraînement, mais l'erreur de validation reste élevée.
 
-\subsection{Jeu Météo-France enrichi}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{rapport/s2/Images/Modelisation/spatial_gridsearch_gap_results.png}
+\caption{Écart entre entraînement et validation sur le split spatial fixe.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : figure générée dans \texttt{Prediction\_visualisation.ipynb} à partir de \texttt{tmrt\_grid\_search\_spatial\_results.csv}.}
+\label{fig:spatial-gridsearch-gap}
+\end{figure}
 
-La dernière réponse revient aux variables. La section données expliquait que Météo-France doit reconstruire le contexte atmosphérique que le chariot ne peut pas fournir partout. Le jeu Météo-France a donc été repris pour privilégier des variables plus physiques. Les anciennes colonnes qualité ne sont plus utilisées comme variables météorologiques principales. Le modèle s'appuie davantage sur la température, l'humidité, le vent, la pluie, la nébulosité, la visibilité, le temps présent, le rayonnement et des variables dérivées.
-La variable \texttt{WW}, qui décrit le temps présent, a aussi été testée comme variable catégorielle dans \texttt{CatBoost}. Les sorties du projet indiquent que le gain est très faible sur split aléatoire et qu'il n'améliore pas les splits robustes. Le modèle final conserve donc une représentation numérique enrichie, notamment avec \texttt{ww\_precip\_flag} dans les exports utilisés pour les résultats.
-Ces solutions ne corrigent pas toutes les limites du problème. Elles rendent cependant la démarche plus cohérente avec l'objectif du S2. La première modélisation cherchait surtout à vérifier que la prédiction était possible. Les solutions apportées cherchent à savoir dans quelles conditions cette prédiction peut être considérée comme exploitable.
+Cette piste n'est donc pas inutile. Elle montre que généraliser depuis un seul parcours est trop difficile avec le jeu de variables actuel. Elle a conduit à un compromis plus réaliste : séparer les données par blocs de parcours et de jour, tout en gardant les trois parcours représentés dans les différents ensembles.
+
+\subsection{Passage au split spatio-temporel}
+
+La deuxième version du split sépare les observations par blocs \texttt{track\_id} et \texttt{day\_utc}. Cette solution répond mieux à la structure des données. Elle évite de mettre deux lignes presque identiques dans l'entraînement et le test, tout en conservant une diversité de parcours dans chaque ensemble.
+Avec \texttt{HistGradientBoostingRegressor}, le split spatio-temporel fixe donne une RMSE de 5,33 \(^{\circ}\mathrm{C}\) sur la validation et de 5,82 \(^{\circ}\mathrm{C}\) sur le test. Le test de robustesse sur plusieurs tirages montre que le résultat dépend du choix des jours. Sur les 10 tirages testés, la RMSE moyenne sur le test vaut 5,16 \(^{\circ}\mathrm{C}\), avec un écart-type de 0,53 \(^{\circ}\mathrm{C}\). Cette variabilité confirme que le score ne doit pas être lu comme une valeur unique et définitive.
+\hyperref[tab:split-spatiotemporel]{Le tableau~\ref{tab:split-spatiotemporel}} rassemble les résultats principaux du split spatio-temporel avec le premier modèle.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Évaluation & MAE & RMSE & \(R^2\) \\
+\midrule
+Validation fixe & 3,82 & 5,33 & 0,679 \\
+Test fixe & 3,77 & 5,82 & 0,493 \\
+Test répété, moyenne & 3,38 & 5,16 & 0,544 \\
+Test répété, écart-type & 0,46 & 0,53 & 0,096 \\
+\bottomrule
+\end{tabular}
+\caption{Résultats de \texttt{HistGradientBoostingRegressor} avec le split spatio-temporel.}
+\label{tab:split-spatiotemporel}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : exports \texttt{tmrt\_spatiotemporal\_split\_metrics.csv} et \texttt{tmrt\_spatiotemporal\_repeated\_summary.csv}.}
+\end{table}
+
+\hyperref[fig:split-robustesse-rmse]{La figure~\ref{fig:split-robustesse-rmse}} complète ce tableau en montrant la RMSE obtenue pour chaque tirage du split. Elle rappelle que le résultat dépend des jours affectés à l'entraînement, à la validation et au test.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{rapport/s2/Images/Modelisation/split_robustness_rmse_results.png}
+\caption{Variabilité de la RMSE selon le tirage du split spatio-temporel.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : figure générée dans \texttt{Prediction\_visualisation.ipynb} à partir de \texttt{tmrt\_spatiotemporal\_repeated\_split\_results.csv}.}
+\label{fig:split-robustesse-rmse}
+\end{figure}
+
+\subsection{Second modèle : CatBoostRegressor}
+
+La dernière étape de modélisation passe à \texttt{CatBoostRegressor} \cite{catboost-2018}. Ce changement ne correspond pas à un abandon complet de l'approche précédente. Les deux modèles restent des modèles à arbres boostés, adaptés aux données tabulaires et aux relations non linéaires. L'intérêt de \texttt{CatBoostRegressor} est de mieux exploiter les variables catégorielles disponibles, comme \texttt{track\_id}, \texttt{M\_slot}, \texttt{section\_id} et \texttt{segment\_id}.
+Le modèle CatBoost final a été évalué sur le split spatio-temporel issu du tirage \texttt{random\_state=9}. Cette précision est importante, car les résultats ne doivent pas être mélangés avec ceux du split fixe présenté juste avant. Sur ce tirage, \texttt{HistGradientBoostingRegressor} obtenait une RMSE test de 4,68 \(^{\circ}\mathrm{C}\). \texttt{CatBoostRegressor} descend à 4,41 \(^{\circ}\mathrm{C}\), avec une MAE de 2,54 \(^{\circ}\mathrm{C}\) et un \(R^2\) de 0,636. Le gain est donc réel sur ce split, même si une validation répétée complète avec CatBoost aurait été préférable.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -528,173 +670,115 @@ Ces solutions ne corrigent pas toutes les limites du problème. Elles rendent ce
 \section{Résultats et analyse critique}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Comparaison entre les deux modèles}
+\subsection{Synthèse chronologique des résultats}
 
-Les résultats doivent être lus dans la continuité des choix précédents. Le premier modèle a permis de vérifier que les variables générales pouvaient expliquer une partie de \texttt{tmrt}. Le passage à \texttt{CatBoostRegressor} a ensuite servi à stabiliser le modèle utilisé pour les analyses finales et pour la carte.
-
-La comparaison disponible dans les sorties du projet montre une amélioration sur une logique de passage. Pour \texttt{HistGradientBoosting}, l'analyse par passage donne une MAE de 3,51 \(^{\circ}\mathrm{C}\), une RMSE de 5,75 \(^{\circ}\mathrm{C}\) et un biais moyen de 1,15 \(^{\circ}\mathrm{C}\). Pour \texttt{CatBoostRegressor}, sur le test par passage des points bruts, la MAE vaut 3,02 \(^{\circ}\mathrm{C}\), la RMSE vaut 5,11 \(^{\circ}\mathrm{C}\), le \(R^2\) vaut 0,648 et le biais vaut 0,46 \(^{\circ}\mathrm{C}\).
-
-\hyperref[tab:hgb-catboost]{Le tableau~\ref{tab:hgb-catboost}} rassemble les résultats utilisés pour comparer le premier modèle et le modèle retenu ensuite.
+Les résultats doivent être lus dans l'ordre de construction du notebook. Le premier modèle a montré que les données Météo-France seules ne suffisent pas. Les embeddings AlphaEarth améliorent nettement la prédiction. Les variables enrichies et le réglage de \texttt{HistGradientBoostingRegressor} améliorent ensuite le modèle, mais le vrai changement vient surtout du split spatio-temporel et du passage à \texttt{CatBoostRegressor}.
+\hyperref[tab:synthese-modeles-s2]{Le tableau~\ref{tab:synthese-modeles-s2}} résume les résultats principaux. Les lignes ne sont pas toutes directement comparables, car elles ne reposent pas toujours sur le même split. Le tableau sert surtout à montrer l'évolution de la démarche.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{lrrrr}
+\begin{tabularx}{\textwidth}{p{0.36\textwidth}rrrrY}
 \toprule
-Modèle et évaluation & MAE & RMSE & \(R^2\) & Biais \\
+Étape & MAE & RMSE & \(R^2\) & Lignes test & Lecture \\
 \midrule
-\texttt{HistGradientBoosting}, passage & 3,51 & 5,75 & n.d. & 1,15 \\
-\texttt{CatBoostRegressor}, passage & 3,02 & 5,11 & 0,648 & 0,46 \\
+\texttt{MF\_only} & 5,20 & 8,07 & 0,344 & \(67\,070\) & La météo seule est insuffisante. \\
+\texttt{MF\_plus\_AE\_raw64} & 4,04 & 6,29 & 0,601 & \(67\,070\) & AlphaEarth apporte une information spatiale utile. \\
+\texttt{HistGradientBoosting} enrichi & 3,83 & 5,75 & 0,667 & \(67\,070\) & Le modèle progresse, mais le split reste favorable. \\
+\texttt{HistGradientBoosting} spatio-temporel & 3,77 & 5,82 & 0,493 & \(108\,977\) & L'évaluation devient plus exigeante. \\
+\texttt{CatBoostRegressor} spatio-temporel & 2,54 & 4,41 & 0,636 & \(105\,406\) & Meilleur résultat final, sur le tirage \texttt{random\_state=9}. \\
 \bottomrule
-\end{tabular}
-\caption{Comparaison des résultats disponibles pour les deux modèles sur une logique de passage.}
-\label{tab:hgb-catboost}
+\end{tabularx}
+\caption{Évolution des résultats au cours de la modélisation.}
+\label{tab:synthese-modeles-s2}
 \vspace{-0.35cm}
-\caption*{\footnotesize Source : exports \texttt{bias\_analysis.csv} et \texttt{tmrt\_catboost\_non\_iid\_aggregation\_ww\_eval.csv}.}
+\caption*{\footnotesize Source : exports du dossier \texttt{data/processed/results}.}
 \end{table}
 
-Cette comparaison doit rester prudente, car les métriques ne viennent pas exactement du même fichier d'export. Elle ne suffit donc pas à conclure que tout le gain vient seulement du changement de modèle. Elle montre plutôt une évolution de la démarche. Le premier modèle a servi à construire un cadre de prédiction, puis \texttt{CatBoostRegressor} a été retenu pour produire un modèle plus adapté à la suite du travail.
+\hyperref[fig:progression-modeles-s2]{La figure~\ref{fig:progression-modeles-s2}} donne une lecture visuelle de cette progression. Elle doit être lue avec la même prudence que le tableau, car les étapes ne reposent pas toutes sur le même découpage.
 
-\subsection{Effet du split et de l'agrégation}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{rapport/s2/Images/Modelisation/model_progression_results.png}
+\caption{Évolution des résultats au cours de la modélisation.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : figure générée dans \texttt{Prediction\_visualisation.ipynb} à partir des exports du dossier \texttt{data/processed/results}.}
+\label{fig:progression-modeles-s2}
+\end{figure}
 
-Le résultat le plus important ne vient pas seulement de la comparaison entre modèles. Il vient surtout de l'évaluation. En split aléatoire, \texttt{CatBoostRegressor} obtient une RMSE de 3,15 \(^{\circ}\mathrm{C}\). En split par passage, elle monte à 5,11 \(^{\circ}\mathrm{C}\). En split par parcours et jour, elle atteint 7,47 \(^{\circ}\mathrm{C}\). Ce changement confirme que le split aléatoire est trop favorable pour juger la généralisation.
+Le résultat CatBoost est le plus solide obtenu dans le temps disponible. Il ne supprime pas les limites du jeu de données, mais il améliore clairement le modèle précédent sur le split utilisé. Il devient donc le modèle le plus cohérent pour produire les analyses finales et préparer la carte.
 
-\hyperref[tab:catboost-splits]{Le tableau~\ref{tab:catboost-splits}} détaille l'effet du découpage et de l'agrégation spatiale sur les métriques.
+\subsection{Variables les plus utilisées}
+
+L'importance des variables confirme que le modèle suit une logique physique plausible. Les variables les plus importantes sont \texttt{T\_x\_GLO}, \texttt{GLO}, \texttt{apparent\_T}, \texttt{T}, \texttt{solar\_hour\_angle}, puis plusieurs dimensions AlphaEarth comme \texttt{A52} et \texttt{A35}. Le créneau \texttt{M\_slot} apparaît aussi parmi les variables importantes.
+Cette hiérarchie est cohérente avec le problème. \texttt{tmrt} dépend fortement du rayonnement, de la température, de l'heure et de la configuration spatiale. Le modèle ne s'appuie donc pas seulement sur une variable unique. Il combine un contexte météorologique général avec une description spatiale fournie par AlphaEarth.
+\hyperref[fig:catboost-importance-variables]{La figure~\ref{fig:catboost-importance-variables}} présente les variables les plus utilisées par CatBoost dans le modèle final.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{rapport/s2/Images/Modelisation/catboost_feature_importance_top20_results.png}
+\caption{Variables les plus utilisées par le modèle CatBoost final.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : figure générée dans \texttt{Prediction\_visualisation.ipynb} à partir de \texttt{tmrt\_catboost\_feature\_importance.csv}.}
+\label{fig:catboost-importance-variables}
+\end{figure}
+
+\subsection{Erreurs par parcours et par créneau}
+
+L'analyse du test CatBoost montre que les erreurs restent différentes selon les parcours. La RMSE vaut 4,17 \(^{\circ}\mathrm{C}\) sur Antigone, 4,35 \(^{\circ}\mathrm{C}\) sur Écusson et 4,71 \(^{\circ}\mathrm{C}\) sur Boulevards. Les écarts ne sont pas énormes, mais ils indiquent que le modèle ne généralise pas avec la même facilité partout. La différence par créneau est plus nette. \texttt{M2} est le créneau le plus difficile, avec une RMSE de 5,77 \(^{\circ}\mathrm{C}\). \texttt{M3} reste aussi difficile, avec une RMSE de 4,87 \(^{\circ}\mathrm{C}\). À l'inverse, \texttt{M4} est beaucoup plus simple, avec une RMSE de 1,32 \(^{\circ}\mathrm{C}\). Cela suggère que les situations où le rayonnement varie fortement sont les plus difficiles à prédire. \hyperref[tab:catboost-erreurs-groupes]{Le tableau~\ref{tab:catboost-erreurs-groupes}} présente les erreurs par parcours et par créneau sur le test CatBoost.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrr}
 \toprule
-Données et split \texttt{CatBoostRegressor} & Lignes du jeu & Lignes test & MAE & RMSE \\
+Groupe & Lignes & MAE & RMSE \\
 \midrule
-Points bruts, \texttt{random\_row} & \(341\,281\) & \(68\,257\) & 1,61 & 3,15 \\
-Points bruts, \texttt{passage\_group} & \(341\,281\) & \(70\,860\) & 3,02 & 5,11 \\
-Points bruts, \texttt{day\_track\_group} & \(341\,281\) & \(68\,477\) & 4,80 & 7,47 \\
-Agrégation 10 m, \texttt{passage\_group} & \(22\,185\) & \(4\,482\) & 2,86 & 5,07 \\
-Agrégation 20 m, \texttt{passage\_group} & \(11\,224\) & \(2\,269\) & 2,81 & 4,85 \\
-Agrégation 20 m, \texttt{day\_track\_group} & \(11\,224\) & \(2\,758\) & 4,90 & 6,77 \\
+Antigone & \(34\,121\) & 2,47 & 4,17 \\
+Écusson & \(36\,100\) & 2,55 & 4,35 \\
+Boulevards & \(35\,185\) & 2,60 & 4,71 \\
+\texttt{M1} & \(23\,081\) & 2,44 & 3,70 \\
+\texttt{M2} & \(30\,277\) & 3,41 & 5,77 \\
+\texttt{M3} & \(29\,209\) & 2,91 & 4,87 \\
+\texttt{M4} & \(22\,839\) & 1,00 & 1,32 \\
 \bottomrule
 \end{tabular}
-\caption{Effet des splits et de l'agrégation spatiale sur les résultats.}
-\label{tab:catboost-splits}
+\caption{Erreurs CatBoost selon le parcours et le créneau.}
+\label{tab:catboost-erreurs-groupes}
 \vspace{-0.35cm}
-\caption*{\footnotesize Source : export \texttt{tmrt\_catboost\_non\_iid\_aggregation\_ww\_eval.csv}.}
-\end{table}
-
-L'agrégation répond à la question de l'autocorrélation. À 20 m, le résultat s'améliore légèrement sur split par passage, avec une RMSE de 4,85 \(^{\circ}\mathrm{C}\) contre 5,11 \(^{\circ}\mathrm{C}\) sur les points bruts. Cette amélioration va dans le sens attendu, car les paquets de points presque identiques pèsent moins lourd. Elle ne résout cependant pas toute la difficulté. Le split par parcours et jour reste le plus exigeant, ce qui montre que le changement de contexte entre journées et parcours reste difficile pour le modèle.
-
-\subsection{Effet du jeu Météo-France enrichi}
-
-Le modèle final utilise le jeu météorologique enrichi présenté dans la section données. L'objectif était de remplacer les variables locales du chariot par un contexte atmosphérique plus facilement disponible sur toute la ville. Par rapport à l'ancien jeu de variables météo, le test passe d'une RMSE de 5,98 \(^{\circ}\mathrm{C}\) à 5,89 \(^{\circ}\mathrm{C}\). La MAE passe de 3,80 \(^{\circ}\mathrm{C}\) à 3,71 \(^{\circ}\mathrm{C}\). Le \(R^2\) passe de 0,464 à 0,481. L'amélioration est modérée, mais elle va dans le bon sens.
-
-\hyperref[tab:catboost-features]{Le tableau~\ref{tab:catboost-features}} montre le gain obtenu avec le jeu de variables Météo-France enrichi.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{lrrrr}
-\toprule
-Jeu \texttt{CatBoostRegressor} sur test & Variables & MAE & RMSE & \(R^2\) \\
-\midrule
-Ancien jeu météo & 93 & 3,80 & 5,98 & 0,464 \\
-Jeu météo enrichi & 118 & 3,71 & 5,89 & 0,481 \\
-\bottomrule
-\end{tabular}
-\caption{Effet du jeu météo enrichi sur le modèle final.}
-\label{tab:catboost-features}
-\vspace{-0.35cm}
-\caption*{\footnotesize Source : export \texttt{tmrt\_catboost\_mf\_feature\_set\_comparison.csv}.}
-\end{table}
-
-Ce gain limité est aussi une information utile. Il suggère que les erreurs restantes ne viennent pas seulement d'un manque de variables météorologiques générales. Une partie de l'erreur reste liée à des phénomènes très locaux que le modèle décrit encore indirectement, comme l'ombre, la forme des rues ou les variations radiatives brusques.
-
-\subsection{Erreurs par parcours et créneau}
-
-L'analyse d'erreur détaillée du modèle final est faite sur un test par blocs parcours et jour. Elle donne une RMSE de 5,93 \(^{\circ}\mathrm{C}\), une MAE de 3,69 \(^{\circ}\mathrm{C}\) et un biais moyen de -1,08 \(^{\circ}\mathrm{C}\). Le signe négatif signifie que le modèle sous-prédit en moyenne sur ce test.
-
-Les erreurs ne sont pas réparties de manière uniforme. Le parcours Écusson est le plus difficile, avec une RMSE de 6,51 \(^{\circ}\mathrm{C}\) et un biais de -2,31 \(^{\circ}\mathrm{C}\). Boulevards a une RMSE de 5,78 \(^{\circ}\mathrm{C}\) et Antigone une RMSE de 5,45 \(^{\circ}\mathrm{C}\). Par créneau, \texttt{M2} est le plus difficile avec une RMSE de 7,70 \(^{\circ}\mathrm{C}\). \texttt{M4} est beaucoup plus simple dans ce test, avec une RMSE de 2,34 \(^{\circ}\mathrm{C}\).
-
-\hyperref[tab:error-groups]{Le tableau~\ref{tab:error-groups}} présente les erreurs par parcours et par créneau.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{lrrrr}
-\toprule
-Groupe & Lignes & MAE & RMSE & Biais \\
-\midrule
-Écusson & \(35\,698\) & 3,63 & 6,51 & -2,31 \\
-Boulevards & \(39\,136\) & 3,42 & 5,78 & -0,48 \\
-Antigone & \(34\,143\) & 4,07 & 5,45 & -0,50 \\
-\texttt{M2} & \(29\,871\) & 5,18 & 7,70 & -1,09 \\
-\texttt{M3} & \(28\,720\) & 3,58 & 5,87 & -1,32 \\
-\texttt{M1} & \(28\,574\) & 3,80 & 5,77 & -1,13 \\
-\texttt{M4} & \(21\,812\) & 1,67 & 2,34 & -0,70 \\
-\bottomrule
-\end{tabular}
-\caption{Erreur du modèle selon les parcours et les créneaux.}
-\label{tab:error-groups}
-\vspace{-0.35cm}
-\caption*{\footnotesize Source : exports \texttt{catboost\_error\_by\_track.csv} et \texttt{catboost\_error\_by\_mslot.csv}.}
+\caption*{\footnotesize Source : exports \texttt{tmrt\_catboost\_test\_by\_track.csv} et \texttt{tmrt\_catboost\_pred\_test.csv}.}
 \end{table}
 
 \hyperref[fig:error-track-slot]{La figure~\ref{fig:error-track-slot}} permet de visualiser ces différences d'erreur entre parcours et créneaux.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}[b]{0.49\textwidth}
-  \centering
-  \includegraphics[width=\textwidth]{rapport/s2/Images/Modelisation/catboost_error_by_track.png}
-  \caption{Erreur par parcours.}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.49\textwidth}
-  \centering
-  \includegraphics[width=\textwidth]{rapport/s2/Images/Modelisation/catboost_error_heatmap_track_mslot.png}
-  \caption{Erreur par parcours et créneau.}
-\end{subfigure}
+\includegraphics[width=0.78\textwidth]{rapport/s2/Images/Modelisation/catboost_error_by_track_mslot_results.png}
 \caption{Les erreurs dépendent du parcours et du créneau horaire.}
 \vspace{-0.35cm}
-\caption*{\footnotesize Source : analyse d'erreurs générée par \texttt{Prediction.ipynb}.}
+\caption*{\footnotesize Source : figure générée dans \texttt{Prediction\_visualisation.ipynb} à partir de \texttt{tmrt\_catboost\_pred\_test.csv}.}
 \label{fig:error-track-slot}
 \end{figure}
 
-\subsection{Erreurs selon la météo et le contexte spatial}
+\subsection{Limite principale : les fortes valeurs de \texttt{tmrt}}
 
-Les erreurs ont aussi été regroupées selon le contexte météorologique et selon un proxy spatial produit dans l'analyse d'erreurs. Cette lecture est importante, car elle relie directement les résultats au choix des variables. Si le modèle utilise Météo-France et AlphaEarth pour remplacer les mesures locales du chariot, il faut vérifier où cette approximation reste fragile.
-
-Sur les situations sans pluie, les contextes de rayonnement fort et très fort sont les plus difficiles. Le contexte sans pluie et rayonnement très fort atteint une RMSE de 8,21 \(^{\circ}\mathrm{C}\), contre 2,84 \(^{\circ}\mathrm{C}\) pour le contexte sans pluie et rayonnement nul. Les cas de pluie ont une erreur plus faible, mais ils sont aussi beaucoup moins nombreux dans le test, avec \(1\,275\) et \(902\) lignes. Il ne faut donc pas conclure que le modèle est meilleur sous la pluie de manière générale.
-
-Le proxy spatial montre aussi des écarts. Le groupe ouvert exposé atteint une RMSE de 7,31 \(^{\circ}\mathrm{C}\), tandis que le groupe d'ombrage dense a une RMSE de 4,86 \(^{\circ}\mathrm{C}\). L'ordre n'est pas parfaitement régulier, car le groupe plutôt ombragé reste difficile, avec une RMSE de 6,94 \(^{\circ}\mathrm{C}\). Cela indique surtout que les situations urbaines ne sont pas décrites avec la même précision selon les contextes.
-
-\hyperref[fig:error-weather-environment]{La figure~\ref{fig:error-weather-environment}} synthétise les erreurs selon ces deux familles de contexte.
+La limite la plus nette concerne les fortes valeurs de \texttt{tmrt}. Sur le test CatBoost, les valeurs courantes sont mieux prédites que les extrêmes. Entre 15 et 20 \(^{\circ}\mathrm{C}\), la RMSE vaut 2,12 \(^{\circ}\mathrm{C}\). Entre 20 et 25 \(^{\circ}\mathrm{C}\), elle vaut 2,75 \(^{\circ}\mathrm{C}\). Au-delà de 40 \(^{\circ}\mathrm{C}\), elle monte à 17,15 \(^{\circ}\mathrm{C}\).
+Le modèle a donc tendance à lisser les pics chauds. Pour les valeurs observées supérieures à 40 \(^{\circ}\mathrm{C}\), la moyenne observée vaut 47,63 \(^{\circ}\mathrm{C}\), alors que la moyenne prédite vaut 32,82 \(^{\circ}\mathrm{C}\). Cette sous-prédiction des extrêmes est importante pour l'interprétation. La carte finale peut aider à repérer des contrastes spatiaux, mais elle ne doit pas être présentée comme une mesure exacte des pics radiatifs.
+\hyperref[fig:error-tmrt-level]{La figure~\ref{fig:error-tmrt-level}} montre cette hausse de l'erreur lorsque les valeurs observées de \texttt{tmrt} augmentent.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{rapport/s2/Images/Modelisation/catboost_error_weather_environment.png}
-\caption{Erreur du modèle selon le contexte météo et le proxy spatial.}
+\includegraphics[width=0.86\textwidth]{rapport/s2/Images/Modelisation/catboost_error_by_tmrt_level_results.png}
+\caption{L'erreur augmente sur les fortes valeurs de \texttt{tmrt}.}
 \vspace{-0.35cm}
-\caption*{\footnotesize Source : figures générées à partir des exports \texttt{catboost\_error\_by\_weather\_context.csv} et \texttt{catboost\_error\_by\_environment\_proxy.csv}.}
-\label{fig:error-weather-environment}
+\caption*{\footnotesize Source : figure générée dans \texttt{Prediction\_visualisation.ipynb} à partir de \texttt{tmrt\_catboost\_pred\_test.csv}.}
+\label{fig:error-tmrt-level}
 \end{figure}
 
-\subsection{Erreurs selon le niveau de \texttt{tmrt}}
+\subsection{Lecture critique}
 
-Le diagnostic le plus net concerne les fortes valeurs de \texttt{tmrt}. Sur le quintile le plus chaud, où la valeur observée moyenne vaut 33,50 \(^{\circ}\mathrm{C}\), la prédiction moyenne vaut 25,73 \(^{\circ}\mathrm{C}\). Le biais atteint -7,77 \(^{\circ}\mathrm{C}\), avec une RMSE de 11,30 \(^{\circ}\mathrm{C}\). Le modèle décrit donc mieux le centre de la distribution que les extrêmes.
-
-\hyperref[fig:bias-tmrt-level]{La figure~\ref{fig:bias-tmrt-level}} montre ce lissage des extrêmes de \texttt{tmrt}.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.78\textwidth]{rapport/s2/Images/Modelisation/catboost_bias_by_tmrt_level.png}
-\caption{Le modèle lisse les extrêmes de \texttt{tmrt}.}
-\vspace{-0.35cm}
-\caption*{\footnotesize Source : analyse d'erreurs générée par \texttt{Prediction.ipynb}.}
-\label{fig:bias-tmrt-level}
-\end{figure}
-
-Cette limite est importante. Pour un usage lié au confort thermique, les fortes valeurs de \texttt{tmrt} sont souvent les situations les plus intéressantes à détecter. Le modèle final est donc utile, mais il ne doit pas être présenté comme une mesure exacte des pics radiatifs.
+Le bilan est positif, mais il doit rester prudent. Le modèle final améliore nettement les résultats obtenus au début du semestre. Il exploite des variables cohérentes avec le phénomène étudié et il permet de produire une prédiction dense sur une grille. En revanche, il reste évalué sur un nombre limité de jours et de parcours. Les répétitions de split montrent que les métriques varient selon les blocs choisis. La sous-prédiction des fortes valeurs de \texttt{tmrt} montre aussi que le modèle décrit mieux les tendances générales que les situations extrêmes.
+La conclusion raisonnable est donc la suivante. Le modèle ne remplace pas les mesures du chariot, mais il donne une spatialisation exploitable de \texttt{tmrt} dans un scénario donné. Il permet de passer d'une mesure mobile coûteuse et ponctuelle à une carte dense, tout en gardant une incertitude forte sur les pics de chaleur radiative.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -706,10 +790,22 @@ Cette limite est importante. Pour un usage lié au confort thermique, les fortes
 
 Après l'évaluation du modèle, l'étape suivante a consisté à sortir du cadre des seuls parcours mesurés. Les données PICOPATT donnent des mesures très riches, mais uniquement là où le chariot est passé. La carte cherche donc à répondre à une autre question : que donnerait le modèle si on appliquait la même logique de prédiction sur une grille régulière couvrant Montpellier et une partie de son agglomération.
 Cette étape est centrale dans le S2. Elle transforme le modèle en un outil de spatialisation. Le but n'est pas de prétendre que toute la ville a été mesurée. Il s'agit de produire une prédiction dense à partir des variables disponibles partout sur la grille, en particulier les embeddings AlphaEarth et un scénario météorologique fixé.
+\hyperref[fig:alphaearth-grille-couverture]{La figure~\ref{fig:alphaearth-grille-couverture}} montre l'écart d'échelle entre les parcours mesurés et la grille AlphaEarth à 10 m. Les parcours représentent une petite partie de l'emprise, tandis que la grille sert à appliquer le modèle sur un espace beaucoup plus dense.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{rapport/s2/Images/Heatmap/alphaearth_grid_coverage_10m.png}
+\caption{Couverture de la grille AlphaEarth à 10 m et position des parcours mesurés.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : figure générée à partir de \texttt{mtp\_grid\_10m\_points.csv} et \texttt{picopatt\_points.csv}.}
+\label{fig:alphaearth-grille-couverture}
+\end{figure}
 
 \subsection{Passage des points AlphaEarth aux prédictions}
 
 La construction de la carte est réalisée dans le script \texttt{heatmap\_montpellier\_10m.py}. Le script lit les points de grille dans \texttt{data/processed/alphaearth/alphaearth\_data/mtp\_points.csv}. Chaque point contient un identifiant, une longitude, une latitude et les 64 dimensions AlphaEarth, de \texttt{A00} à \texttt{A63}. Ces variables jouent le rôle de description spatiale de l'environnement urbain.
+Le choix d'une grille à 10 m vient aussi de la nature des données AlphaEarth. Les embeddings utilisés dans le projet sont disponibles à cette échelle spatiale, ce qui donne une unité de description beaucoup plus large que la fréquence brute des mesures du chariot. Cette différence de granularité a joué un rôle dans les essais de modélisation. Les points PICOPATT successifs sont souvent espacés de moins d'un mètre et restent donc fortement autocorrélés. Pour limiter le poids de ces paquets de points presque identiques, des agrégations spatiales à 10 m puis à 20 m ont été testées pendant l'entraînement. L'objectif était de rapprocher l'unité statistique du modèle de l'unité spatiale réellement disponible dans AlphaEarth, plutôt que de laisser le modèle apprendre sur une succession de lignes très redondantes.
+Ces agrégations ne remplacent pas les données du chariot. Elles servent à réduire l'effet de répétition entre points voisins et à vérifier si les performances restent cohérentes lorsque l'on diminue la dépendance locale entre observations. La carte finale conserve ensuite le pas de 10 m, car c'est le pas directement cohérent avec les embeddings AlphaEarth utilisés pour couvrir Montpellier.
 Le modèle utilisé est un \texttt{CatBoostRegressor} issu du meilleur réglage obtenu dans \texttt{Prediction.ipynb}. Il est réentraîné sur l'ensemble des données PICOPATT disponibles, soit \(341\,281\) lignes. Le modèle utilise 118 variables : 38 variables Météo-France, 64 variables AlphaEarth et 16 variables complémentaires. Les coordonnées géographiques ne sont pas utilisées comme variables d'entrée, ce qui évite que le modèle apprenne simplement une position.
 Le script applique ensuite le modèle à la grille par paquets de \(50\,000\) lignes. Ce fonctionnement évite de charger toute la grille en mémoire au même moment. Le fichier produit contient \(1\,469\,430\) prédictions, avec pour chaque ligne l'identifiant du point, la longitude, la latitude et la valeur de \texttt{tmrt} prédite.
 
@@ -721,7 +817,7 @@ Ce choix rend la carte interprétable, car toutes les différences visibles vien
 \subsection{Création du raster et de la heatmap}
 
 Une fois les prédictions calculées, elles sont transformées en raster. Le script regroupe les points par cellules spatiales avec \texttt{numpy.histogram2d}. Les valeurs sont moyennées lorsqu'une cellule contient plusieurs points. Le raster final contient \(1\,314\) colonnes et \(1\,133\) lignes. Il sert ensuite à produire une figure statique, une image transparente superposable à une carte et une première carte interactive HTML.
-Cette étape est importante pour le rendu. Les prédictions existent d'abord comme un tableau de points. La heatmap est une représentation continue de ces points, plus lisible pour observer les zones relativement plus chaudes ou plus fraîches. Elle permet aussi de préparer la couche cartographique utilisée ensuite dans l'application web.
+À ce stade, la sortie du modèle reste encore un tableau de points. Le raster sert à transformer ce résultat tabulaire en une couche lisible sur une carte. La heatmap permet alors d'observer les zones relativement plus chaudes ou plus fraîches et prépare la couche cartographique utilisée ensuite dans l'application web.
 \hyperref[tab:heatmap-files]{Le tableau~\ref{tab:heatmap-files}} résume les principales sorties produites pendant cette étape.
 
 \begin{table}[H]
@@ -776,7 +872,7 @@ Maximum prédit & 23,67 \(^{\circ}\mathrm{C}\) \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.92\textwidth]{rapport/s2/Images/Heatmap/tmrt_montpellier_10m_heatmap_catboost.png}
+\includegraphics[width=0.75\textwidth]{rapport/s2/Images/Heatmap/tmrt_montpellier_10m_heatmap_catboost.png}
 \caption{Carte de \texttt{tmrt} prédite via les embeddings AlphaEarth à 10 m.}
 \vspace{-0.35cm}
 \caption*{\footnotesize Source : \texttt{heatmap\_montpellier\_10m.py}, prédictions \texttt{CatBoostRegressor}.}
@@ -788,6 +884,14 @@ Maximum prédit & 23,67 \(^{\circ}\mathrm{C}\) \\
 La carte ne doit pas être lue comme une carte de mesures. Elle représente une prédiction du modèle pour un scénario donné. Elle hérite donc des limites vues dans l'analyse critique, notamment la tendance à lisser les fortes valeurs de \texttt{tmrt}. Cette limite est importante pour l'interprétation : la carte aide à repérer des contrastes spatiaux, mais elle ne remplace pas une campagne de mesure.
 La première version interactive générée en HTML a confirmé que la spatialisation fonctionnait. Elle a aussi montré que l'affichage direct d'une couche dense était insuffisant pour un usage fluide. C'est ce constat qui a conduit à construire une application web séparée, avec une architecture plus adaptée à la navigation, au filtrage et à l'export.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{rapport/s2/Images/Heatmap/html.png}
+\caption{Carte HTML de \texttt{tmrt} prédite via les embeddings AlphaEarth à 10 m.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : \texttt{heatmap\_montpellier\_10m.py}, prédictions \texttt{CatBoostRegressor}.}
+\label{fig:heatmap_html}
+\end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 
@@ -797,7 +901,7 @@ La première version interactive générée en HTML a confirmé que la spatialis
 \subsection{Objectif de l'application}
 
 L'application web a été construite pour rendre la carte réellement exploitable. La première carte HTML permettait de voir la heatmap, mais elle ne suffisait pas pour manipuler les résultats. L'objectif de l'application est donc plus large : afficher la couche de \texttt{tmrt} prédite, comparer cette couche aux parcours réalisés, filtrer les valeurs visibles et préparer des extractions en CSV.
-Ce travail reprend une partie de la logique présente dans \texttt{Localisation.ipynb}. Le notebook contenait déjà une approche cartographique, avec des données localisées, des tracés et une logique de sélection. L'application reprend cette idée, mais elle l'adapte à un autre volume de données. On ne travaille plus seulement autour de points de parcours. On travaille sur une grille de plus d'un million de prédictions.
+Ce travail reprend une partie de la logique présente dans \texttt{Localisation.ipynb}. Le notebook a été developpé en parallèle du modèle lors du S2 et contient une approche cartographique, avec des données localisées, des tracés et une logique de sélection. L'application reprend cette idée, mais elle l'adapte à un autre volume de données. On ne travaille plus seulement autour de points de parcours. On travaille sur une grille de plus d'un million de prédictions.
 
 \subsection{Architecture générale}
 
@@ -828,7 +932,7 @@ La version finale est organisée dans le dossier \texttt{app/webapp\_tmrt\_montp
 
 \subsection{Optimisation de la couche heatmap}
 
-Le principal problème technique venait de la taille de la couche. Afficher directement \(1\,469\,430\) points dans le navigateur aurait produit une interface lente et difficile à manipuler. L'application ne charge donc pas les points bruts pour dessiner la heatmap. Elle utilise une logique de tuiles, comme un fond cartographique classique.
+Le premier affichage direct des points était trop lourd dans le navigateur. L'affichage point par point a donc été remplacé par une logique de tuiles, comme pour un fond cartographique classique.
 Le script \texttt{build\_tmrt\_webapp.py} découpe l'image transparente de heatmap en tuiles de \(256 \times 256\) pixels, du zoom 12 au zoom 17. Ces tuiles sont placées dans \texttt{heatmap\_tiles}. Le navigateur ne charge alors que les tuiles visibles à l'écran, ce qui rend le déplacement et le zoom plus fluides.
 Une deuxième couche de tuiles a été ajoutée pour rendre le filtre de \texttt{tmrt} plus fiable. Les tuiles de \texttt{heatmap\_value\_tiles} ne servent pas d'abord à afficher une couleur. Elles encodent la valeur prédite sous forme normalisée. Dans \texttt{app.js}, chaque tuile est lue dans un \texttt{canvas}, puis les pixels sont rendus transparents s'ils sont en dehors de la plage sélectionnée. Les pixels conservés sont recolorés avec la palette \texttt{inferno}. Cette solution explique pourquoi le sélecteur de température fonctionne sans recalculer la carte.
 
@@ -870,25 +974,49 @@ L'export contient l'identifiant de la sélection, son nom, la longitude, la lati
 \subsection{Interface finale}
 
 L'interface est organisée en deux onglets. L'onglet carte regroupe les contrôles de parcours, les statistiques du raster, l'opacité de la heatmap et la jauge de \texttt{tmrt}. L'onglet sélection garde la même carte, mais affiche les outils nécessaires pour dessiner une zone, ajouter une sélection et exporter les points. Le changement d'onglet ne réinitialise pas la carte, ce qui permet de choisir une plage de valeurs dans l'onglet carte puis de passer à la sélection sans perdre le contexte.
-\hyperref[fig:webapp-screens]{La figure~\ref{fig:webapp-screens}} prépare les emplacements des captures de l'application web finale.
+
+\hyperref[fig:webapp-carte]{La figure~\ref{fig:webapp-carte}} présente la vue principale de l'application. Elle montre la heatmap prédite sur le fond satellite, les contrôles des parcours et les statistiques globales de la grille.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}[b]{0.49\textwidth}
-  \centering
-  \webappscreen{rapport/s2/Images/Webapp/webapp_carte.png}{vue carte de l'application}
-  \caption{Vue carte.}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.49\textwidth}
-  \centering
-  \webappscreen{rapport/s2/Images/Webapp/webapp_selection.png}{vue sélection de l'application}
-  \caption{Vue sélection.}
-\end{subfigure}
-\caption{Emplacements prévus pour les captures de l'application web.}
+\webappscreen{Images/Webapp/carte.png}{vue carte de l'application}
+\caption{Vue principale de l'application web.}
 \vspace{-0.35cm}
-\caption*{\footnotesize Source : application générée par \texttt{build\_tmrt\_webapp.py}.}
-\label{fig:webapp-screens}
+\caption*{\footnotesize Source : données de l'application générée par \texttt{build\_tmrt\_webapp.py}.}
+\label{fig:webapp-carte}
+\end{figure}
+
+\hyperref[fig:webapp-selection]{La figure~\ref{fig:webapp-selection}} montre l'onglet de sélection. Il permet de définir une zone exportable, soit avec un rectangle dessiné à la main, soit à partir de la vue courante de la carte.
+
+\begin{figure}[H]
+\centering
+\webappscreen{Images/Webapp/selection.png}{vue sélection de l'application}
+\caption{Onglet de sélection et zones exportables.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : données de l'application générée par \texttt{build\_tmrt\_webapp.py}.}
+\label{fig:webapp-selection}
+\end{figure}
+
+\hyperref[fig:webapp-plage-tmrt]{La figure~\ref{fig:webapp-plage-tmrt}} illustre le rôle de la jauge placée sous la carte. En déplaçant les bornes, l'utilisateur ne garde visibles que les pixels dont la valeur prédite de \texttt{tmrt} appartient à la plage choisie.
+
+\begin{figure}[H]
+\centering
+\webappscreen{Images/Webapp/plage_tmrt_predite.png}{filtre par plage de tmrt prédite}
+\caption{Filtrage visuel par plage de \texttt{tmrt} prédite.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : données de l'application générée par \texttt{build\_tmrt\_webapp.py}.}
+\label{fig:webapp-plage-tmrt}
+\end{figure}
+
+\hyperref[fig:webapp-selection-plage]{La figure~\ref{fig:webapp-selection-plage}} montre le cas le plus complet. La sélection géographique et la plage de \texttt{tmrt} sont utilisées ensemble, ce qui permet d'ajouter seulement les points compris dans la zone affichée et dans l'intervalle de température choisi.
+
+\begin{figure}[H]
+\centering
+\webappscreen{Images/Webapp/zoom_+_selection_tmrt.png}{sélection avec plage de tmrt}
+\caption{Ajout des points appartenant à la zone affichée et à la plage de \texttt{tmrt} sélectionnée.}
+\vspace{-0.35cm}
+\caption*{\footnotesize Source : données de l'application générée par \texttt{build\_tmrt\_webapp.py}.}
+\label{fig:webapp-selection-plage}
 \end{figure}
 
 \subsection{Limites de l'application}
@@ -928,7 +1056,7 @@ Une autre amélioration concernerait l'export CSV. L'export actuel donne les coo
 Ce second semestre a prolongé le travail du S1 en changeant progressivement d'objectif. Le S1 avait surtout permis de comprendre les données PICOPATT, les parcours, les variables mesurées et les profils de confort thermique. Le S2 a repris cette base pour aller vers une question plus prédictive : peut-on utiliser des variables disponibles plus largement pour estimer \texttt{tmrt} au-delà des seuls points mesurés par le chariot.
 La première partie du semestre 2 a donc consisté à construire un jeu de données cohérent avec cet objectif. Les mesures PICOPATT ont servi à définir la cible, Météo-France a fourni un contexte atmosphérique généralisable et AlphaEarth a fourni une description spatiale disponible sur les parcours puis sur une grille de Montpellier. Ce choix a imposé une contrainte forte : ne pas utiliser comme variables d'entrée des mesures embarquées qui ne seraient pas disponibles partout sur la ville.
 La modélisation a ensuite évolué en plusieurs étapes. Le premier modèle avec \texttt{HistGradientBoosting} a montré que la prédiction était possible, mais il a aussi mis en évidence un problème central : les mesures ne sont pas indépendantes. Les points sont très proches dans le temps et dans l'espace, ce qui rend le split aléatoire trop optimiste. Les évaluations par groupes, l'agrégation spatiale, l'enrichissement des variables Météo-France et le passage à \texttt{CatBoostRegressor} ont permis d'obtenir une évaluation plus crédible.
-Les résultats sont intéressants, mais ils doivent rester lus avec prudence. Le modèle final obtient une RMSE de 5,11 \(^{\circ}\mathrm{C}\) en split par passage et de 7,47 \(^{\circ}\mathrm{C}\) en split par bloc parcours et jour. L'analyse détaillée donne une RMSE de 5,93 \(^{\circ}\mathrm{C}\), une MAE de 3,69 \(^{\circ}\mathrm{C}\) et un biais moyen de -1,08 \(^{\circ}\mathrm{C}\). Elle montre surtout une limite importante sur les fortes valeurs de \texttt{tmrt}, que le modèle tend à sous-prédire.
+Les résultats sont intéressants, mais ils doivent rester lus avec prudence. Le modèle final améliore les scores obtenus avec le premier modèle et donne une carte exploitable. L'analyse détaillée montre surtout une limite importante sur les fortes valeurs de \texttt{tmrt}, que le modèle tend à lisser. Cette limite est centrale pour l'interprétation, car les pics radiatifs sont justement les situations les plus importantes à repérer.
 La carte à 10 m et l'application web sont l'aboutissement de cette chaîne. Elles ne sont pas des éléments séparés du modèle. Elles reposent sur le même choix de variables, le même scénario météorologique et les mêmes limites d'évaluation. Leur intérêt est de rendre les prédictions lisibles, de comparer les parcours avec la heatmap et d'extraire des zones sélectionnées. Elles donnent une forme concrète au travail du S2, tout en obligeant à bien distinguer une prédiction d'une mesure.
 Au final, ce semestre a permis de construire une chaîne complète allant des données mesurées à une carte interactive. Le résultat principal n'est pas seulement une performance chiffrée. C'est aussi une meilleure compréhension de ce qui est possible avec les données disponibles, de ce qui reste fragile et des précautions nécessaires pour spatialiser \texttt{tmrt} à l'échelle de Montpellier.
 

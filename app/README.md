@@ -31,5 +31,7 @@ python -m http.server 8765 --bind 127.0.0.1
 Puis ouvrir :
 
 ```text
-http://127.0.0.1:8765/webapp_tmrt_montpellier/
+http://127.0.0.1:8765/
 ```
+
+La page d'accueil redirige automatiquement vers `webapp_tmrt_montpellier/`.
