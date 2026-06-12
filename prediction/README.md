@@ -1,54 +1,163 @@
-# Prédiction TMRT
+# Prédiction et spatialisation de la tmrt
 
-Modélisation de la TMRT à partir des données PICOPATT, des variables Météo-France et des embeddings AlphaEarth.
+Ce dossier contient les notebooks et scripts du semestre 2. L'objectif est de
+prédire la `tmrt` mesurée par PICOPATT à partir de variables utilisables en
+dehors des parcours :
 
-## Fichiers
+- les observations horaires de Météo-France pour le contexte météorologique
+- les 64 embeddings AlphaEarth `A00` à `A63` pour le contexte spatial
 
-- `Prediction.ipynb` : entraînement, comparaison des modèles, analyse des erreurs et exports de prédiction.
-- `Prediction_visualisation.ipynb` : notebook autonome pour générer les figures utiles à la présentation et à l'analyse de la prédiction.
-- `heatmap_montpellier_10m.py` : prédiction de la TMRT sur la grille de Montpellier et génération des cartes.
+Les coordonnées servent aux jointures et à la cartographie, mais elles ne sont
+pas utilisées comme variables explicatives dans le modèle final de la heatmap.
 
-## Figures générées
+## Fichiers principaux
 
-- `figures/prediction_data/` : aperçu des données utilisées pour la prédiction, distribution de la TMRT et différences selon les parcours et créneaux.
-- `figures/eval/` : comparaison des stratégies de validation, prédiction vs observation et résidus par parcours/créneau.
-- `figures/biais/` : biais moyen global et biais par groupe.
-- `figures/model_analysis/` : analyse des erreurs du modèle, zones où les résidus sont forts et groupes les plus difficiles.
-- `figures/no_iid/` : structure en blocs spatio-temporels et autocorrélation de la TMRT.
-- Les figures issues de l'entraînement principal sont réparties entre `figures/prediction_data/`, `figures/eval/` et `figures/model_analysis/`.
-- `figures/heatmap_tmrt_montpellier_10m/` : cartes TMRT produites sur la grille AlphaEarth à 10 m.
+- `Alphaearth.ipynb` : association des embeddings AlphaEarth aux points
+  PICOPATT et préparation des tables spatiales.
+- `Grille_AE_mtp.ipynb` : construction de la grille régulière de Montpellier
+  et préparation des extractions AlphaEarth.
+- `Prediction.ipynb` : notebook principal de préparation des variables,
+  entraînement, comparaison des modèles, évaluation et analyse des erreurs.
+- `Prediction_colab_version.ipynb` : version prévue pour une exécution sur
+  Google Colab.
+- `Prediction_visualisation.ipynb` : génération de figures à partir des CSV
+  présents dans `data/processed/results/` et
+  `data/processed/prediction/`.
+- `heatmap_montpellier_10m.py` : réentraînement du modèle choisi, prédiction
+  sur la grille à 10 m et génération des sorties cartographiques.
 
-La figure `predicted_vs_observed_by_split.png` utilise les prédictions détaillées par split si `data/processed/prediction/eval/predictions_by_split.csv` existe. Sinon, le notebook indique la limite et utilise les prédictions disponibles dans `tmrt_pred_report`.
+## Évolution de la modélisation
 
-## Variables Météo-France du CatBoost
+Le travail a suivi plusieurs étapes :
 
-Le modèle CatBoost utilisé pour la heatmap 10 m reprend désormais un jeu de variables Météo-France plus physique :
+1. première régression avec `HistGradientBoostingRegressor`
+2. comparaison de Météo-France seul, Météo-France avec les 64 embeddings
+   AlphaEarth et Météo-France avec une ACP des embeddings
+3. enrichissement des variables météorologiques et temporelles
+4. remplacement du split aléatoire par des évaluations spatiales puis
+   spatio-temporelles
+5. répétition des splits pour mesurer la sensibilité aux blocs choisis
+6. test de `CatBoostRegressor` et d'un grid search léger
+7. analyse des erreurs par parcours, créneau, niveau de `tmrt` et météo
+8. agrégations spatiales à 10 m et 20 m pour réduire la redondance locale
+
+L'ACP ne donne pas d'amélioration nette par rapport aux 64 embeddings bruts.
+Le split aléatoire reste très favorable, car il mélange des observations très
+proches entre l'entraînement et le test.
+
+## Résultats d'évaluation
+
+Les résultats ne doivent pas être comparés sans tenir compte du protocole, du
+modèle et du niveau d'agrégation.
+
+Pour le split spatial fixe sauvegardé dans
+`data/processed/results/tmrt_spatial_split_metrics.csv`, le test sur Antigone
+donne :
+
+| MAE | RMSE | R² |
+|---:|---:|---:|
+| 5,16 °C | 7,54 °C | 0,439 |
+
+Pour le split spatio-temporel fixe sauvegardé dans
+`data/processed/results/tmrt_spatiotemporal_split_metrics.csv`, le test donne :
+
+| MAE | RMSE | R² |
+|---:|---:|---:|
+| 3,77 °C | 5,82 °C | 0,493 |
+
+Les répétitions de split sont disponibles dans
+`tmrt_spatiotemporal_repeated_split_results.csv` et leur synthèse dans
+`tmrt_spatiotemporal_repeated_summary.csv`.
+
+L'expérience non-i.i.d. et les agrégations spatiales sont exportées dans
+`data/processed/prediction/tmrt_pred_report/` :
+
+- `tmrt_catboost_non_iid_aggregation_ww_eval.csv`
+
+Ces expériences montrent que le score du split aléatoire ne représente pas la
+capacité du modèle à généraliser à des jours ou parcours non vus.
+
+## Variables Météo-France
+
+Le modèle de spatialisation utilise 38 variables météorologiques brutes ou
+dérivées, parmi lesquelles :
 
 - température et humidité : `T`, `TD`, `TN`, `TX`, `U`, `UN`, `UX`, `UABS`
 - pression : `PSTAT`, `PMER`
-- vent et rafales : `FF`, `FXY`, `FXI`, avec `DD` et `DXI` encodées en sinus/cosinus
+- vent et rafales : `FF`, `FXY`, `FXI`, `DD`, `DXI`
 - pluie : `RR1`, `DRR1`
 - nébulosité et visibilité : `N`, `NBAS`, `WW`, `VV`
-- rayonnement : `INS`, `GLO`, `GLO2`
+- rayonnement et insolation : `INS`, `GLO`, `GLO2`
 
-Les colonnes qualité `Q...` ne sont plus utilisées comme variables météo. Le modèle ajoute des variables dérivées : composantes circulaires du vent, `wind_u`, `wind_v`, `gust_u`, `gust_v`, `dewpoint_depression`, `T_range_hour`, `U_range_hour`, `rain_flag`, `rain_duration_weighted`, `GLO_x_INS`, puis les interactions temporelles/solaires déjà utilisées (`apparent_T`, `T_x_elev`, `FF_x_GLO`, `N_x_elev`, `GLO_x_elev`, `N_x_GLO`, `T_x_GLO`).
+Les directions sont encodées avec des composantes sinus et cosinus. Le jeu
+contient également des variables dérivées comme `wind_u`, `wind_v`,
+`dewpoint_depression`, `rain_flag`, `GLO_x_INS`, `FF_x_GLO`, `N_x_GLO` et
+`T_x_GLO`.
 
-Une comparaison CatBoost sur split par blocs jour/parcours est exportée dans `data/processed/prediction/tmrt_pred_report/tmrt_catboost_mf_feature_set_comparison.csv`. Sur le test, le jeu enrichi passe de RMSE 5,981 à 5,889 °C, de MAE 3,796 à 3,714 °C et de R² 0,464 à 0,481 par rapport à l'ancien set météo.
-
-## Évaluation non-IID et agrégation spatiale
-
-La fin de `Prediction.ipynb` contient une expérience dédiée à l'autocorrélation : points bruts, agrégation par tronçons de 10 m et agrégation par tronçons de 20 m sont comparés avec trois splits (`random_row`, `passage_group`, `day_track_group`). Les résultats sont exportés dans `data/processed/prediction/tmrt_pred_report/tmrt_catboost_non_iid_aggregation_ww_eval.csv`.
-
-Le split aléatoire reste très optimiste : sur les points bruts, le RMSE test est proche de 3,13 °C, alors qu'il monte à environ 5,10 °C en split par passage et 7,47 °C en split par bloc parcours+jour. L'agrégation réduit fortement la redondance des données : 341 281 points deviennent 22 185 lignes à 10 m et 11 224 lignes à 20 m. Sur les métriques point par point avec split groupé, l'agrégation à 20 m aide légèrement, mais les métriques moyennées par passage ne s'améliorent pas systématiquement.
-
-`WW` a aussi été testé comme variable catégorielle CatBoost. Le gain est très faible sur split aléatoire et il n'améliore pas les splits robustes ; le modèle final conserve donc une représentation numérique enrichie par des flags météo (`ww_precip_flag`, `ww_fog_flag`, `ww_thunder_flag`).
+`WW` a été testé comme variable catégorielle CatBoost. Cette représentation
+n'améliore pas clairement les splits groupés. La spatialisation actuelle
+utilise donc sa représentation numérique et des indicateurs dérivés.
 
 ## Analyse des erreurs
 
-La fin de `Prediction.ipynb` contient aussi une analyse détaillée des erreurs du CatBoost sur un test robuste par blocs `track_id + jour`. Les tableaux sont exportés dans `data/processed/prediction/error_analysis/` et les figures dans `prediction/figures/model_analysis/`.
+Les exports d'analyse se trouvent dans
+`data/processed/prediction/error_analysis/` et les figures associées dans
+`prediction/figures/model_analysis/`.
 
-Sur ce test, le modèle obtient RMSE 5,93 °C, MAE 3,69 °C et un biais moyen `pred - obs` de -1,08 °C. Les erreurs ne sont pas homogènes : l'Écusson est le parcours le plus difficile (RMSE 6,51 °C, biais -2,31 °C), M2 est le créneau le plus difficile (RMSE 7,70 °C), et les pires combinaisons sont surtout `ecusson/M2`, `boulevards/M2`, `antigone/M3` et `ecusson/M3`.
+Les diagnostics montrent notamment :
 
-Le diagnostic le plus important est la sous-prédiction des fortes TMRT : sur le quintile le plus chaud, le biais atteint -7,77 °C et la RMSE 11,30 °C. L'erreur augmente aussi quand le rayonnement global est fort ou très fort. Cela suggère que le modèle lisse trop les extrêmes : il décrit correctement le centre de la distribution, mais il manque encore les pics de TMRT, surtout en conditions très ensoleillées et dans certains environnements urbains.
+- des performances différentes selon les parcours et les créneaux
+- une difficulté plus forte sur l'Écusson dans l'évaluation analysée
+- une augmentation de l'erreur lorsque le rayonnement global est fort
+- un lissage des fortes valeurs de `tmrt`
 
-Les profils `environment_proxy` sont des clusters AlphaEarth ordonnés par TMRT observée sous soleil. Ils donnent un proxy ombragé/dense vs ouvert/exposé, mais ne doivent pas être présentés comme une vérité terrain urbaine sans validation visuelle.
+La carte finale doit donc être interprétée comme une spatialisation
+exploratoire, et non comme une mesure directe ou une estimation d'incertitude
+faible.
+
+## Génération de la heatmap
+
+Le script utilise par défaut `CatBoostRegressor` et prédit la grille par blocs
+de 50 000 lignes :
+
+```powershell
+python prediction\heatmap_montpellier_10m.py
+```
+
+Pour régénérer uniquement les figures à partir des prédictions existantes :
+
+```powershell
+python prediction\heatmap_montpellier_10m.py --plot-existing data\processed\prediction\heatmap_tmrt_montpellier_10m\tmrt_montpellier_10m_predictions_catboost.csv
+```
+
+Le modèle HistGradientBoosting reste disponible :
+
+```powershell
+python prediction\heatmap_montpellier_10m.py --model histgbr
+```
+
+Les principales sorties sont écrites dans :
+
+- `data/processed/prediction/heatmap_tmrt_montpellier_10m/`
+- `prediction/figures/heatmap_tmrt_montpellier_10m/`
+
+La sortie CatBoost actuelle contient `1 469 430` prédictions sur une grille à
+10 m. Le raster associé contient `1314 × 1133` cellules.
+
+## Scénario de la carte
+
+La carte publiée utilise les valeurs médianes du jeu d'entraînement pour les
+variables qui ne viennent pas d'AlphaEarth. Les principales valeurs sont :
+
+| Variable | Valeur |
+|---|---:|
+| `T` | 12,0 °C |
+| `U` | 65 % |
+| `FF` | 3,6 m/s |
+| `RR1` | 0 mm |
+| `GLO` | 54 W/m² |
+| `INS` | 15 min |
+| `WW` | 0 |
+
+La météo étant identique sur toute la grille, les contrastes affichés viennent
+principalement de la description spatiale AlphaEarth.
